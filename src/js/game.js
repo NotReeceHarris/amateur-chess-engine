@@ -11,74 +11,203 @@ const peices = {
     blackKnight: "/src/png/b_knight.png",
     blackRook: "/src/png/b_rook.png",
     blackPawn: "/src/png/b_pawn.png",
-};
-
-const board = [
+}, board = [
     ["blackRook", "blackKnight", "blackBishop", "blackQueen", "blackKing", "blackBishop", "blackKnight", "blackRook"],
-    ["blackPawn", "", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn"],
+    ["blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn"],
     ["", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", ""],
     ["whitePawn", "whitePawn", "whitePawn", "whitePawn", "whitePawn", "whitePawn", "whitePawn", "whitePawn"],
     ["whiteRook", "whiteKnight", "whiteBishop", "whiteQueen", "whiteKing", "whiteBishop", "whiteKnight", "whiteRook"],
-];
+], taken = [];
 
 let selectedPeice;
 
-function getPeice (notation) {
+function getPiece(notation) {
     const x = ['a','b','c','d','e','f','g','h'].indexOf(notation.split('')[0]);
     const y = (7 - notation.split('')[1]) + 1;
     return board[y][x] || null;
 }
 
 function getLetter (i) {
-    return ['a','b','c','d','e','f','g','h'][i]
+    return ['a','b','c','d','e','f','g','h'][i];
 }
 
 function reverseLetter (i) {
-    return  ['a','b','c','d','e','f','g','h'].indexOf(i)
+    return  ['a','b','c','d','e','f','g','h'].indexOf(i);
+}
+
+function isOccupiedByColor (cell, color) { 
+    return cell.includes(color);
 }
 
 function getLegalMoves (notation) {
 
-    const x = notation.split('')[0];
-    const y = parseInt(notation.split('')[1]);
+    const pieces = getPiece(notation);
+    if (pieces == null) return;
 
-    const peices = getPeice(notation);
+    const legalMoves = [],
 
-    if (peices == null) {
-        return;
+    x = notation.split('')[0],
+    y = parseInt(notation.split('')[1]),
+
+    north = `${x}${y + 1}`,
+    east = `${getLetter(reverseLetter(x) + 1)}${y}`,
+    south = `${x}${y - 1}`,
+    west = `${getLetter(reverseLetter(x) - 1)}${y}`,
+
+    nw = `${getLetter(reverseLetter(x) - 1)}${y+1}`,
+    sw = `${getLetter(reverseLetter(x) - 1)}${y-1}`,
+    ne = `${getLetter(reverseLetter(x) + 1)}${y+1}`,
+    se = `${getLetter(reverseLetter(x) + 1)}${y-1}`,
+
+    surroundings = {
+        north: y != 8 ? getPiece(north) : null,
+        east: x != 'h' ? getPiece(east) : null,
+        south: y != 1 ? getPiece(south) : null,
+        west: x != 'a' ? getPiece(west) : null,
+        nw: x != 'a' && y != 8 ? getPiece(nw) : null,
+        sw: x != 'a' && y != 1 ? getPiece(sw) : null,
+        ne: x != 'h' && y != 8 ? getPiece(ne) : null,
+        se: x != 'h' && y != 1 ? getPiece(se) : null,
     }
 
-    const legalMoves = [];
+    const color = pieces.includes("white") ? "white" : "black";
+    const opponentColor = color === "white" ? "black" : "white";
 
-    if (peices.includes("Pawn")) {
-        if (peices.includes("white")) {
+    // ===============
+    //     LOGIC
+    // ===============
 
-            // If theres a no peice infront of it
-            if (!getPeice(`${x}${y+1}`)) {
-                legalMoves.push(`${x}${y + 1}`)
-                // Move twice if first move
-                if (y === 2) legalMoves.push(`${x}${y + 2}`);
+    if (pieces.includes("Pawn")) {
+
+        if (color === 'white') {
+
+            if (!surroundings.north) {
+                legalMoves.push(north)
+                if (y === 2 && !getPiece(`${x}${y + 2}`)) legalMoves.push(`${x}${y + 2}`);
             }
 
-            console.log({
-                front: getPeice(`${x}${y + 1}`),
-                back: getPeice(`${x}${y - 1}`),
-                left: getPeice(`${getLetter(reverseLetter(x) - 1)}${y}`),
-                right: getPeice(`${getLetter(reverseLetter(x) + 1)}${y}`),
-            })
+            if (surroundings.nw && isOccupiedByColor(surroundings.nw, opponentColor)) legalMoves.push(nw);
+            if (surroundings.ne && isOccupiedByColor(surroundings.ne, opponentColor)) legalMoves.push(ne);
+        
+        } else {
+
+            if (!surroundings.south) {
+                legalMoves.push(south)
+                if (y === 7  && !getPiece(`${x}${y - 2}`)) legalMoves.push(`${x}${y - 2}`);
+            }
+
+            if (surroundings.sw && isOccupiedByColor(surroundings.sw, 'white')) legalMoves.push(sw);
+            if (surroundings.se && isOccupiedByColor(surroundings.se, 'white')) legalMoves.push(se);
+        
+        }
+
+    }
+
+    if (pieces.includes('Rook')) {
+        if (color === 'white') {
+
+             // Above
+             for (let yy = y+1; yy < 9; yy++) {
+                const peice = getPiece(`${x}${yy}`)
+                if (peice && peice.includes('white')) break;
+
+                legalMoves.push(`${x}${yy}`)
+                if (peice && peice.includes('black')) {
+                    legalMoves.push(`${x}${yy}`)
+                    break;
+                }
+            }
+
+            // Below
+            for (let yy = y-1; yy > 0; yy--) {
+                const peice = getPiece(`${x}${yy}`)
+                if (peice && peice.includes('white')) break;
+
+                legalMoves.push(`${x}${yy}`)
+                if (peice && peice.includes('black')) {
+                    legalMoves.push(`${x}${yy}`)
+                    break;
+                }
+            }
+
+            // Left
+            for (let xx = reverseLetter(x)-1; xx > -1; xx--) {
+                const peice = getPiece(`${getLetter(xx)}${y}`)
+                if (peice && peice.includes('white')) break;
+
+                legalMoves.push(`${getLetter(xx)}${y}`)
+                if (peice && peice.includes('black')) {
+                    legalMoves.push(`${getLetter(xx)}${y}`)
+                    break;
+                }
+
+            }
+
+            // Right
+            for (let xx = reverseLetter(x)+1; xx < 8; xx++) {
+                const peice = getPiece(`${getLetter(xx)}${y}`)
+                if (peice && peice.includes('white')) break;
+
+                legalMoves.push(`${getLetter(xx)}${y}`)
+                if (peice && peice.includes('black')) {
+                    legalMoves.push(`${getLetter(xx)}${y}`)
+                    break;
+                }
+            }
 
         } else {
 
-            // If theres a no peice infront of it
-            if (!getPeice(`${x}${y-1}`)) {
-                legalMoves.push(`${x}${y - 1}`)
-                // Move twice if first move
-                if (y === 7) legalMoves.push(`${x}${y - 2}`);
+            // Above
+            for (let yy = y+1; yy < 9; yy++) {
+                const peice = getPiece(`${x}${yy}`)
+                if (peice && peice.includes('black')) break;
+
+                legalMoves.push(`${x}${yy}`)
+                if (peice && peice.includes('white')) {
+                    legalMoves.push(`${x}${yy}`)
+                    break;
+                }
             }
 
+            // Below
+            for (let yy = y-1; yy > 0; yy--) {
+                const peice = getPiece(`${x}${yy}`)
+                if (peice && peice.includes('black')) break;
+
+                legalMoves.push(`${x}${yy}`)
+                if (peice && peice.includes('white')) {
+                    legalMoves.push(`${x}${yy}`)
+                    break;
+                }
+            }
+
+            // Left
+            for (let xx = reverseLetter(x)-1; xx > -1; xx--) {
+                const peice = getPiece(`${getLetter(xx)}${y}`)
+                if (peice && peice.includes('black')) break;
+
+                legalMoves.push(`${getLetter(xx)}${y}`)
+                if (peice && peice.includes('white')) {
+                    legalMoves.push(`${getLetter(xx)}${y}`)
+                    break;
+                }
+
+            }
+
+            // Right
+            for (let xx = reverseLetter(x)+1; xx < 8; xx++) {
+                const peice = getPiece(`${getLetter(xx)}${y}`)
+                if (peice && peice.includes('black')) break;
+
+                legalMoves.push(`${getLetter(xx)}${y}`)
+                if (peice && peice.includes('white')) {
+                    legalMoves.push(`${getLetter(xx)}${y}`)
+                    break;
+                }
+            }
 
         }
     }
@@ -100,9 +229,20 @@ function movePeice(from, to) {
     fromCoor[1] = ['a','b','c','d','e','f','g','h'].indexOf(from[0])
     toCoor[1] =  ['a','b','c','d','e','f','g','h'].indexOf(to[0])
     
+    fromBoard = board[fromCoor[0]][fromCoor[1]]
+    toBoard = board[toCoor[0]][toCoor[1]]
 
-    board[toCoor[0]][toCoor[1]] = board[fromCoor[0]][fromCoor[1]]
-    board[fromCoor[0]][fromCoor[1]] = ""
+    console.log([fromCoor[0], fromCoor[1]], [toCoor[0], toCoor[1]])
+    console.log(fromBoard, toBoard)
+
+    if (toBoard) {
+        taken.push(toBoard)
+        board[toCoor[0]][toCoor[1]] = ""
+    }
+
+    board[fromCoor[0]][fromCoor[1]] = ""    
+    board[toCoor[0]][toCoor[1]] = fromBoard
+    
     displayBoard()
 }
 
@@ -118,15 +258,19 @@ function displayLegalMoves (legalMoves) {
 
     legalMoves.forEach((move) => {
         const square = document.querySelector("." + move);
+
+        const clone = square.cloneNode(true);
+
         const marker = document.createElement("div");
         marker.classList.add("bg-red-500", "marker", 'w-full', 'h-full', 'opacity-50', 'absolute', 'top-0', 'left-0');
-        square.appendChild(marker);
-        square.classList.add("cursor-pointer");
+        clone.appendChild(marker);
+        clone.classList.add("cursor-pointer");
 
-        square.addEventListener("click", () => {
+        clone.addEventListener("click", () => {
             movePeice(selectedPeice, move);
         });
 
+        square.replaceWith(clone);
     });
 }
 
@@ -160,7 +304,7 @@ function displayBoard () {
 
                 square.addEventListener("click", (e) => {
                     selectedPeice = `${xx}${yy}`
-                    getPeice(`${xx}${yy}`);
+                    getPiece(`${xx}${yy}`);
                     const legalMoves = getLegalMoves(`${xx}${yy}`);
                     displayLegalMoves(legalMoves);
                 });
