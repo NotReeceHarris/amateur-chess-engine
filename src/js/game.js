@@ -1,4 +1,4 @@
-const peices = {
+const pieces = {
     whiteKing: "/src/png/w_king.png",
     whiteQueen: "/src/png/w_queen.png",
     whiteBishop: "/src/png/w_bishop.png",
@@ -22,7 +22,8 @@ const peices = {
     ["whiteRook", "whiteKnight", "whiteBishop", "whiteQueen", "whiteKing", "whiteBishop", "whiteKnight", "whiteRook"],
 ], taken = [];
 
-let selectedPeice;
+let selectedPeice,
+whosMove = 'white';
 
 function getPiece(notation) {
     const x = ['a','b','c','d','e','f','g','h'].indexOf(notation.split('')[0]);
@@ -42,10 +43,14 @@ function isOccupiedByColor (cell, color) {
     return cell.includes(color);
 }
 
+function onBoard (x,y) {
+    return x < 8 && x >= 0 && y <= 8 && y > 0 
+}
+
 function getLegalMoves (notation) {
 
     const pieces = getPiece(notation);
-    if (pieces == null) return;
+    if (pieces == null) return [];
 
     const legalMoves = [],
 
@@ -71,13 +76,15 @@ function getLegalMoves (notation) {
         sw: x != 'a' && y != 1 ? getPiece(sw) : null,
         ne: x != 'h' && y != 8 ? getPiece(ne) : null,
         se: x != 'h' && y != 1 ? getPiece(se) : null,
-    }
+    },
 
-    const color = pieces.includes("white") ? "white" : "black";
-    const opponentColor = color === "white" ? "black" : "white";
+    color = pieces.includes("white") ? "white" : "black",
+    opponentColor = color === "white" ? "black" : "white";
+
+    if (color != whosMove) return [];
 
     // ===============
-    //     LOGIC
+    //      LOGIC
     // ===============
 
     if (pieces.includes("Pawn")) {
@@ -107,109 +114,146 @@ function getLegalMoves (notation) {
     }
 
     if (pieces.includes('Rook')) {
-        if (color === 'white') {
+        for (let yy = y+1; yy < 9; yy++) { // Above
+            const piece = getPiece(`${x}${yy}`)
+            if (piece && piece.includes(color)) break;
 
-             // Above
-             for (let yy = y+1; yy < 9; yy++) {
-                const peice = getPiece(`${x}${yy}`)
-                if (peice && peice.includes('white')) break;
-
+            legalMoves.push(`${x}${yy}`)
+            if (piece && piece.includes(opponentColor)) {
                 legalMoves.push(`${x}${yy}`)
-                if (peice && peice.includes('black')) {
-                    legalMoves.push(`${x}${yy}`)
-                    break;
-                }
+                break;
             }
+        } for (let yy = y-1; yy > 0; yy--) { // Below
+            const piece = getPiece(`${x}${yy}`)
+            if (piece && piece.includes(color)) break;
 
-            // Below
-            for (let yy = y-1; yy > 0; yy--) {
-                const peice = getPiece(`${x}${yy}`)
-                if (peice && peice.includes('white')) break;
-
+            legalMoves.push(`${x}${yy}`)
+            if (piece && piece.includes(opponentColor)) {
                 legalMoves.push(`${x}${yy}`)
-                if (peice && peice.includes('black')) {
-                    legalMoves.push(`${x}${yy}`)
-                    break;
-                }
+                break;
             }
+        } for (let xx = reverseLetter(x)-1; xx > -1; xx--) { // Left
+            const piece = getPiece(`${getLetter(xx)}${y}`)
+            if (piece && piece.includes(color)) break;
 
-            // Left
-            for (let xx = reverseLetter(x)-1; xx > -1; xx--) {
-                const peice = getPiece(`${getLetter(xx)}${y}`)
-                if (peice && peice.includes('white')) break;
-
+            legalMoves.push(`${getLetter(xx)}${y}`)
+            if (piece && piece.includes(opponentColor)) {
                 legalMoves.push(`${getLetter(xx)}${y}`)
-                if (peice && peice.includes('black')) {
-                    legalMoves.push(`${getLetter(xx)}${y}`)
-                    break;
-                }
-
+                break;
             }
 
-            // Right
-            for (let xx = reverseLetter(x)+1; xx < 8; xx++) {
-                const peice = getPiece(`${getLetter(xx)}${y}`)
-                if (peice && peice.includes('white')) break;
+        } for (let xx = reverseLetter(x)+1; xx < 8; xx++) { // Right
+            const piece = getPiece(`${getLetter(xx)}${y}`)
+            if (piece && piece.includes(color)) break;
 
+            legalMoves.push(`${getLetter(xx)}${y}`)
+            if (piece && piece.includes(opponentColor)) {
                 legalMoves.push(`${getLetter(xx)}${y}`)
-                if (peice && peice.includes('black')) {
-                    legalMoves.push(`${getLetter(xx)}${y}`)
-                    break;
-                }
+                break;
             }
+        }
+    }
 
-        } else {
+    if (pieces.includes('Knight')) {
 
-            // Above
-            for (let yy = y+1; yy < 9; yy++) {
-                const peice = getPiece(`${x}${yy}`)
-                if (peice && peice.includes('black')) break;
+        const tl = `${getLetter(reverseLetter(x)+1)}${y + 2}`
+        const tr = `${getLetter(reverseLetter(x)-1)}${y + 2}`
+        const rt = `${getLetter(reverseLetter(x)+2)}${y + 1}`
+        const rb = `${getLetter(reverseLetter(x)+2)}${y - 1}`
+        const bl = `${getLetter(reverseLetter(x)+1)}${y - 2}`
+        const br = `${getLetter(reverseLetter(x)-1)}${y - 2}`
+        const lt = `${getLetter(reverseLetter(x)-2)}${y + 1}`
+        const lb = `${getLetter(reverseLetter(x)-2)}${y - 1}`
 
-                legalMoves.push(`${x}${yy}`)
-                if (peice && peice.includes('white')) {
-                    legalMoves.push(`${x}${yy}`)
-                    break;
+        if (onBoard(reverseLetter(x)+1, y+2)) {
+            const piece = getPiece(tl)
+            if (!piece || piece && !isOccupiedByColor(piece, color)) legalMoves.push(tl);
+        } if (onBoard(reverseLetter(x)-1, y+2)) {
+            const piece = getPiece(tr)
+            if (!piece || piece && !isOccupiedByColor(piece, color)) legalMoves.push(tr);
+        } if (onBoard(reverseLetter(x)+2, y+1)) {
+            const piece = getPiece(rt)
+            if (!piece || piece && !isOccupiedByColor(piece, color)) legalMoves.push(rt);
+        } if (onBoard(reverseLetter(x)+2, y-1)) {
+            const piece = getPiece(rb)
+            if (!piece || piece && !isOccupiedByColor(piece, color)) legalMoves.push(rb);
+        } if (onBoard(reverseLetter(x)+1, y-2)) {
+            const piece = getPiece(bl)
+            if (!piece || piece && !isOccupiedByColor(piece, color)) legalMoves.push(bl);
+        } if (onBoard(reverseLetter(x)-1, y-2)) {
+            const piece = getPiece(br)
+            if (!piece || piece && !isOccupiedByColor(piece, color)) legalMoves.push(br);
+        } if (onBoard(reverseLetter(x)-2, y+1)) {
+            const piece = getPiece(lt)
+            if (!piece || piece && !isOccupiedByColor(piece, color)) legalMoves.push(lt);
+        } if (onBoard(reverseLetter(x)-2, y-1)) {
+            const piece = getPiece(lb)
+            if (!piece || piece && !isOccupiedByColor(piece, color)) legalMoves.push(lb);
+        }
+    }
+
+    if (pieces.includes('Bishop')) {
+
+        let nw = true, sw = true, se = true, ne = true
+
+        for (let d = 1; d < 8; d++) {
+            const yy = [y+d, y-d]
+            const xx = [reverseLetter(x)+d, reverseLetter(x)-d]
+
+            if (onBoard(xx[0], yy[0]) && nw) {
+                const piece = getPiece(`${getLetter(xx[0])}${yy[0]}`)
+
+                if (!piece) {
+                    legalMoves.push(`${getLetter(xx[0])}${yy[0]}`);
+                } else if (piece && !isOccupiedByColor(piece, color)) {
+                    legalMoves.push(`${getLetter(xx[0])}${yy[0]}`);
+                    nw = false
+                } else {
+                    nw = false
                 }
-            }
+            } 
 
-            // Below
-            for (let yy = y-1; yy > 0; yy--) {
-                const peice = getPiece(`${x}${yy}`)
-                if (peice && peice.includes('black')) break;
+            if (onBoard(xx[1], yy[1]) && se) {
+                const piece = getPiece(`${getLetter(xx[1])}${yy[1]}`)
 
-                legalMoves.push(`${x}${yy}`)
-                if (peice && peice.includes('white')) {
-                    legalMoves.push(`${x}${yy}`)
-                    break;
+                if (!piece) {
+                    legalMoves.push(`${getLetter(xx[1])}${yy[1]}`);
+                } else if (piece && !isOccupiedByColor(piece, color)) {
+                    legalMoves.push(`${getLetter(xx[1])}${yy[1]}`);
+                    se = false
+                } else {
+                    se = false
                 }
-            }
+            } 
 
-            // Left
-            for (let xx = reverseLetter(x)-1; xx > -1; xx--) {
-                const peice = getPiece(`${getLetter(xx)}${y}`)
-                if (peice && peice.includes('black')) break;
+            if (onBoard(xx[1], yy[0]) && ne) {
+                const piece = getPiece(`${getLetter(xx[1])}${yy[0]}`)
 
-                legalMoves.push(`${getLetter(xx)}${y}`)
-                if (peice && peice.includes('white')) {
-                    legalMoves.push(`${getLetter(xx)}${y}`)
-                    break;
+                if (!piece) {
+                    legalMoves.push(`${getLetter(xx[1])}${yy[0]}`);
+                } else if (piece && !isOccupiedByColor(piece, color)) {
+                    legalMoves.push(`${getLetter(xx[1])}${yy[0]}`);
+                    ne = false
+                } else {
+                    ne = false
                 }
+            } 
 
-            }
+            if (onBoard(xx[0], yy[1]) && sw) {
+                const piece = getPiece(`${getLetter(xx[0])}${yy[1]}`)
 
-            // Right
-            for (let xx = reverseLetter(x)+1; xx < 8; xx++) {
-                const peice = getPiece(`${getLetter(xx)}${y}`)
-                if (peice && peice.includes('black')) break;
-
-                legalMoves.push(`${getLetter(xx)}${y}`)
-                if (peice && peice.includes('white')) {
-                    legalMoves.push(`${getLetter(xx)}${y}`)
-                    break;
+                if (!piece) {
+                    legalMoves.push(`${getLetter(xx[0])}${yy[1]}`);
+                } else if (piece && !isOccupiedByColor(piece, color)) {
+                    legalMoves.push(`${getLetter(xx[0])}${yy[1]}`);
+                    sw = false
+                } else {
+                    sw = false
                 }
-            }
+            } 
 
         }
+
     }
     
     return legalMoves;
@@ -217,28 +261,23 @@ function getLegalMoves (notation) {
 
 function movePeice(from, to) {
 
-    fromCoor = [];
-    toCoor = [];
-
     from = from.split('');
     to = to.split('');
 
-    fromCoor[0] = 7 - (parseInt(from[1]) -1)
-    toCoor[0] = 7 - (parseInt(to[1]) -1)
-
-    fromCoor[1] = ['a','b','c','d','e','f','g','h'].indexOf(from[0])
-    toCoor[1] =  ['a','b','c','d','e','f','g','h'].indexOf(to[0])
+    fromCoor = [7 - (parseInt(from[1]) -1), ['a','b','c','d','e','f','g','h'].indexOf(from[0])];
+    toCoor = [7 - (parseInt(to[1]) -1), ['a','b','c','d','e','f','g','h'].indexOf(to[0])];
     
     fromBoard = board[fromCoor[0]][fromCoor[1]]
     toBoard = board[toCoor[0]][toCoor[1]]
 
-    console.log([fromCoor[0], fromCoor[1]], [toCoor[0], toCoor[1]])
-    console.log(fromBoard, toBoard)
-
     if (toBoard) {
+        console.log('Taken')
         taken.push(toBoard)
         board[toCoor[0]][toCoor[1]] = ""
     }
+
+    if (fromBoard.includes('white')) whosMove = 'black';
+    if (fromBoard.includes('black')) whosMove = 'white';
 
     board[fromCoor[0]][fromCoor[1]] = ""    
     board[toCoor[0]][toCoor[1]] = fromBoard
@@ -304,12 +343,11 @@ function displayBoard () {
 
                 square.addEventListener("click", (e) => {
                     selectedPeice = `${xx}${yy}`
-                    getPiece(`${xx}${yy}`);
-                    const legalMoves = getLegalMoves(`${xx}${yy}`);
+                    const legalMoves = getLegalMoves(selectedPeice);
                     displayLegalMoves(legalMoves);
                 });
 
-                square.innerHTML = `<img src="${peices[board[y][x]]}" alt="${board[y][x]}">`;
+                square.innerHTML = `<img src="${pieces[board[y][x]]}" ${!board[y][x].includes(whosMove) ? 'class="opacity-60' : ''} alt="${board[y][x]}">`;
                 square.classList.add("cursor-pointer");
             }
             
