@@ -272,6 +272,17 @@ function movePeice(from, to) {
 
     if (toBoard) {
         console.log('Taken')
+        
+        const img = document.createElement("img");
+        img.src = pieces[board[toCoor[0]][toCoor[1]]]
+        img.classList.add('w-[18.75px]', 'md:w-[25px]')
+
+        if (board[toCoor[0]][toCoor[1]].includes('white')) {
+            document.getElementById('taken-pieces-black').append(img)
+        } else {
+            document.getElementById('taken-pieces-white').append(img)
+        }
+
         taken.push(toBoard)
         board[toCoor[0]][toCoor[1]] = ""
     }
@@ -301,13 +312,17 @@ function displayLegalMoves (legalMoves) {
         const clone = square.cloneNode(true);
 
         const marker = document.createElement("div");
-        marker.classList.add("bg-red-500", "marker", 'w-full', 'h-full', 'opacity-50', 'absolute', 'top-0', 'left-0');
+        marker.classList.add("bg-red-500", "marker", 'w-full', 'h-full', 'opacity-40', 'absolute', 'top-0', 'left-0');
         clone.appendChild(marker);
         clone.classList.add("cursor-pointer");
 
         clone.addEventListener("click", () => {
             movePeice(selectedPeice, move);
         });
+
+        const image = clone.querySelector('img')
+        if (image) image.classList.remove('opacity-60');
+
 
         square.replaceWith(clone);
     });
@@ -347,7 +362,7 @@ function displayBoard () {
                     displayLegalMoves(legalMoves);
                 });
 
-                square.innerHTML = `<img src="${pieces[board[y][x]]}" ${!board[y][x].includes(whosMove) ? 'class="opacity-60' : ''} alt="${board[y][x]}">`;
+                square.innerHTML = `<img src="${pieces[board[y][x]]}" class="${!board[y][x].includes(whosMove) ? ' opacity-60' : ''}" alt="${board[y][x]}">`;
                 square.classList.add("cursor-pointer");
             }
             
