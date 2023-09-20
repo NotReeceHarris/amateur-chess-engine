@@ -320,9 +320,6 @@ function displayLegalMoves (legalMoves) {
             movePeice(selectedPeice, move);
         });
 
-        const image = clone.querySelector('img')
-        if (image) image.classList.remove('opacity-60');
-
 
         square.replaceWith(clone);
     });
@@ -362,7 +359,7 @@ function displayBoard () {
                     displayLegalMoves(legalMoves);
                 });
 
-                square.innerHTML = `<img src="${pieces[board[y][x]]}" class="${!board[y][x].includes(whosMove) ? ' opacity-60' : ''}" alt="${board[y][x]}">`;
+                square.innerHTML = `<img src="${pieces[board[y][x]]}"  alt="${board[y][x]}">`;
                 square.classList.add("cursor-pointer");
             }
             
