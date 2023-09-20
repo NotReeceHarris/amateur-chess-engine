@@ -15,7 +15,7 @@ const peices = {
 
 const board = [
     ["blackRook", "blackKnight", "blackBishop", "blackQueen", "blackKing", "blackBishop", "blackKnight", "blackRook"],
-    ["blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn"],
+    ["blackPawn", "", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn", "blackPawn"],
     ["", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", ""],
     ["", "", "", "", "", "", "", ""],
@@ -24,10 +24,20 @@ const board = [
     ["whiteRook", "whiteKnight", "whiteBishop", "whiteQueen", "whiteKing", "whiteBishop", "whiteKnight", "whiteRook"],
 ];
 
+let selectedPeice;
+
 function getPeice (notation) {
     const x = ['a','b','c','d','e','f','g','h'].indexOf(notation.split('')[0]);
     const y = (7 - notation.split('')[1]) + 1;
     return board[y][x] || null;
+}
+
+function getLetter (i) {
+    return ['a','b','c','d','e','f','g','h'][i]
+}
+
+function reverseLetter (i) {
+    return  ['a','b','c','d','e','f','g','h'].indexOf(i)
 }
 
 function getLegalMoves (notation) {
@@ -45,9 +55,31 @@ function getLegalMoves (notation) {
 
     if (peices.includes("Pawn")) {
         if (peices.includes("white")) {
-            legalMoves.push(`${x}${y + 1}`, `${x}${y + 2}`)
+
+            // If theres a no peice infront of it
+            if (!getPeice(`${x}${y+1}`)) {
+                legalMoves.push(`${x}${y + 1}`)
+                // Move twice if first move
+                if (y === 2) legalMoves.push(`${x}${y + 2}`);
+            }
+
+            console.log({
+                front: getPeice(`${x}${y + 1}`),
+                back: getPeice(`${x}${y - 1}`),
+                left: getPeice(`${getLetter(reverseLetter(x) - 1)}${y}`),
+                right: getPeice(`${getLetter(reverseLetter(x) + 1)}${y}`),
+            })
+
         } else {
-            legalMoves.push(`${x}${y - 1}`, `${x}${y - 2}`)
+
+            // If theres a no peice infront of it
+            if (!getPeice(`${x}${y-1}`)) {
+                legalMoves.push(`${x}${y - 1}`)
+                // Move twice if first move
+                if (y === 7) legalMoves.push(`${x}${y - 2}`);
+            }
+
+
         }
     }
     
@@ -56,14 +88,26 @@ function getLegalMoves (notation) {
 
 function movePeice(from, to) {
 
+    fromCoor = [];
+    toCoor = [];
+
     from = from.split('');
     to = to.split('');
 
-    console.log(from, to)
+    fromCoor[0] = 7 - (parseInt(from[1]) -1)
+    toCoor[0] = 7 - (parseInt(to[1]) -1)
+
+    fromCoor[1] = ['a','b','c','d','e','f','g','h'].indexOf(from[0])
+    toCoor[1] =  ['a','b','c','d','e','f','g','h'].indexOf(to[0])
     
+
+    board[toCoor[0]][toCoor[1]] = board[fromCoor[0]][fromCoor[1]]
+    board[fromCoor[0]][fromCoor[1]] = ""
+    displayBoard()
 }
 
 function displayLegalMoves (legalMoves) {
+    displayBoard()
     const markers = document.querySelectorAll(".marker");
     markers.forEach(marker => {
         marker.parentNode.classList.remove("cursor-pointer");
@@ -80,7 +124,7 @@ function displayLegalMoves (legalMoves) {
         square.classList.add("cursor-pointer");
 
         square.addEventListener("click", () => {
-            movePeice(document.querySelector(".selected").id, move);
+            movePeice(selectedPeice, move);
         });
 
     });
@@ -115,8 +159,7 @@ function displayBoard () {
             if (board[y][x]) {
 
                 square.addEventListener("click", (e) => {
-                    square.classList.add("selected");
-
+                    selectedPeice = `${xx}${yy}`
                     getPeice(`${xx}${yy}`);
                     const legalMoves = getLegalMoves(`${xx}${yy}`);
                     displayLegalMoves(legalMoves);
