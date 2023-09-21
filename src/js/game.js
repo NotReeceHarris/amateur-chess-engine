@@ -20,7 +20,7 @@ const pieces = {
     ["", "", "", "", "", "", "", ""],
     ["whitePawn", "whitePawn", "whitePawn", "whitePawn", "whitePawn", "whitePawn", "whitePawn", "whitePawn"],
     ["whiteRook", "whiteKnight", "whiteBishop", "whiteQueen", "whiteKing", "whiteBishop", "whiteKnight", "whiteRook"],
-], taken = [];
+], taken = [], simplifiedNotation = [];
 
 let selectedPeice,
 whosMove = 'white';
@@ -45,6 +45,30 @@ function isOccupiedByColor (cell, color) {
 
 function onBoard (x,y) {
     return x < 8 && x >= 0 && y <= 8 && y > 0 
+}
+
+function groupNotation(arr) {
+    const grouped = [];
+    
+    for (let i = 0; i < arr.length; i += 2) {
+      if (i + 1 < arr.length) {
+        grouped.push([arr[i], arr[i + 1]]);
+      } else {
+        grouped.push([arr[i]]);
+      }
+    }
+    
+    return grouped;
+}
+
+function formatPgn(notation) {
+    let output = '';
+
+    notation.forEach((moves, index) => {
+        output+= `${index+1}. ${moves[0]} ${moves[1] ? moves[1] : ''} `
+    });
+
+    return output
 }
 
 function getLegalMoves (notation) {
@@ -92,7 +116,7 @@ function getLegalMoves (notation) {
         if (color === 'white') {
 
             if (!surroundings.north) {
-                legalMoves.push(north)
+                if (onBoard(reverseLetter(x),y + 1)) legalMoves.push(north);
                 if (y === 2 && !getPiece(`${x}${y + 2}`)) legalMoves.push(`${x}${y + 2}`);
             }
 
@@ -102,7 +126,7 @@ function getLegalMoves (notation) {
         } else {
 
             if (!surroundings.south) {
-                legalMoves.push(south)
+                if (onBoard(reverseLetter(x),y - 1)) legalMoves.push(south);
                 if (y === 7  && !getPiece(`${x}${y - 2}`)) legalMoves.push(`${x}${y - 2}`);
             }
 
@@ -113,7 +137,7 @@ function getLegalMoves (notation) {
 
     }
 
-    if (pieces.includes('Rook')) {
+    if (pieces.includes('Rook') || pieces.includes('Queen')) {
         for (let yy = y+1; yy < 9; yy++) { // Above
             const piece = getPiece(`${x}${yy}`)
             if (piece && piece.includes(color)) break;
@@ -192,7 +216,7 @@ function getLegalMoves (notation) {
         }
     }
 
-    if (pieces.includes('Bishop')) {
+    if (pieces.includes('Bishop') || pieces.includes('Queen')) {
 
         let nw = true, sw = true, se = true, ne = true
 
@@ -255,6 +279,17 @@ function getLegalMoves (notation) {
         }
 
     }
+
+    if (pieces.includes("King")) {
+        if (onBoard(reverseLetter(x), y+1) && !surroundings.north || surroundings.north && isOccupiedByColor(surroundings.north, opponentColor)) legalMoves.push(north);
+        if (onBoard(reverseLetter(x)+1, y) && !surroundings.east  || surroundings.east && isOccupiedByColor(surroundings.east, opponentColor)) legalMoves.push(east);
+        if (onBoard(reverseLetter(x), y-1) && !surroundings.south || surroundings.south && isOccupiedByColor(surroundings.south, opponentColor)) legalMoves.push(south);
+        if (onBoard(reverseLetter(x)-1, y) && !surroundings.west  || surroundings.west && isOccupiedByColor(surroundings.west, opponentColor)) legalMoves.push(west);
+        if (onBoard(reverseLetter(x)-1, y+1) && !surroundings.nw  || surroundings.nw && isOccupiedByColor(surroundings.nw, opponentColor)) legalMoves.push(nw);
+        if (onBoard(reverseLetter(x)-1, y-1) && !surroundings.sw  || surroundings.sw && isOccupiedByColor(surroundings.sw, opponentColor)) legalMoves.push(sw);
+        if (onBoard(reverseLetter(x)+1, y+1) && !surroundings.ne  || surroundings.ne && isOccupiedByColor(surroundings.ne, opponentColor)) legalMoves.push(ne);
+        if (onBoard(reverseLetter(x)+1, y-1) && !surroundings.se  || surroundings.se && isOccupiedByColor(surroundings.se, opponentColor)) legalMoves.push(se);
+    }
     
     return legalMoves;
 }
@@ -271,8 +306,6 @@ function movePeice(from, to) {
     toBoard = board[toCoor[0]][toCoor[1]]
 
     if (toBoard) {
-        console.log('Taken')
-        
         const img = document.createElement("img");
         img.src = pieces[board[toCoor[0]][toCoor[1]]]
         img.classList.add('w-[18.75px]', 'md:w-[25px]')
@@ -287,13 +320,72 @@ function movePeice(from, to) {
         board[toCoor[0]][toCoor[1]] = ""
     }
 
-    if (fromBoard.includes('white')) whosMove = 'black';
-    if (fromBoard.includes('black')) whosMove = 'white';
 
     board[fromCoor[0]][fromCoor[1]] = ""    
     board[toCoor[0]][toCoor[1]] = fromBoard
     
     displayBoard()
+
+    if ([0,7].includes(toCoor[0]) && fromBoard.includes('Pawn')) {
+
+        const div = document.createElement("div");
+        div.id = 'pawn-promotion';
+        div.classList.add('drop-shadow-xl', 'w-full', 'h-[150px]', 'md:h-[200px]', 'absolute', `${whosMove === 'white' ? 'top' : 'bottom'}-0`, 'left-0', 'bg-[rgba(34,34,34,0.8)]', 'z-[10]', 'grid', 'grid-rows-[repeat(4,1fr)]', 'border', 'border-white');
+
+        const promotionPieces = [`${whosMove}Queen`, `${whosMove}Knight`, `${whosMove}Rook`, `${whosMove}Bishop`];
+
+        promotionPieces.forEach((piece) => {
+            const img = document.createElement("img");
+            img.id = piece
+            img.src = pieces[piece]
+            img.classList.add('w-full')
+
+            img.addEventListener('click', function() {
+                board[toCoor[0]][toCoor[1]] = piece
+
+                if (toBoard) {
+                    simplifiedNotation.push(`${from[0]}x${to.join('')}=${{'Rook':'R','Knight':'N','Bishop':'B','Queen':'Q'}[piece.replace('white','').replace('black','')]}`)
+                } else {
+                    simplifiedNotation.push(`${to.join('')}=${{'Rook':'R','Knight':'N','Bishop':'B','Queen':'Q'}[piece.replace('white','').replace('black','')]}`)
+                }
+
+                console.log(formatPgn(groupNotation(simplifiedNotation)))
+                document.getElementById('notation').innerText = formatPgn(groupNotation(simplifiedNotation))
+
+                if (fromBoard.includes('white')) whosMove = 'black';
+                if (fromBoard.includes('black')) whosMove = 'white';
+
+                displayBoard()
+            })
+
+            div.append(img)
+        });
+
+        document.querySelector(`.${to.join('')}`).append(div)
+
+    } else {
+
+        if (fromBoard.includes('Pawn')) {
+            simplifiedNotation.push(`${toBoard ? `${from[0]}x` : ''}${to.join('')}`)
+        } else if (fromBoard.includes('Rook')) {
+            simplifiedNotation.push(`R${toBoard ? 'x' : ''}${to.join('')}`)
+        } else if (fromBoard.includes('Knight')) {
+            simplifiedNotation.push(`N${toBoard ? 'x' : ''}${to.join('')}`)
+        } else if (fromBoard.includes('Bishop')) {
+            simplifiedNotation.push(`B${toBoard ? 'x' : ''}${to.join('')}`)
+        } else if (fromBoard.includes('Queen')) {
+            simplifiedNotation.push(`Q${toBoard ? 'x' : ''}${to.join('')}`)
+        } else if (fromBoard.includes('King')) {
+            simplifiedNotation.push(`K${toBoard ? 'x' : ''}${to.join('')}`)
+        }
+    
+        console.log(formatPgn(groupNotation(simplifiedNotation)))
+        document.getElementById('notation').innerText = formatPgn(groupNotation(simplifiedNotation))
+
+        if (fromBoard.includes('white')) whosMove = 'black';
+        if (fromBoard.includes('black')) whosMove = 'white';
+    }
+
 }
 
 function displayLegalMoves (legalMoves) {
