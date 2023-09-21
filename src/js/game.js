@@ -1,4 +1,4 @@
-const pieces = {
+const evaluationAPI = "https://stockfish.online/api/stockfish.php", pieces = {
     whiteKing: "/src/png/w_king.png",
     whiteQueen: "/src/png/w_queen.png",
     whiteBishop: "/src/png/w_bishop.png",
@@ -25,7 +25,9 @@ const pieces = {
 let selectedPeice,
 whosMove = 'white',
 whitePlayer = 'human',
-blackPlayer = 'human';
+blackPlayer = 'human',
+checkmate = false;
+
 
 function getPiece(notation) {
     const x = ['a','b','c','d','e','f','g','h'].indexOf(notation.split('')[0]);
@@ -47,6 +49,11 @@ function isOccupiedByColor (cell, color) {
 
 function onBoard (x,y) {
     return x < 8 && x >= 0 && y <= 8 && y > 0 
+}
+
+function isCheckMate(fen) {
+    const chess = new Chess(fen)
+    return chess.isCheckmate()
 }
 
 function groupNotation(arr) {
@@ -296,102 +303,139 @@ function getLegalMoves (notation) {
     return legalMoves;
 }
 
-function movePeice(from, to) {
+async function movePeice(from, to) {
 
-    from = from.split('');
-    to = to.split('');
+    if (!checkmate) {
+        from = from.split('');
+        to = to.split('');
 
-    fromCoor = [7 - (parseInt(from[1]) -1), ['a','b','c','d','e','f','g','h'].indexOf(from[0])];
-    toCoor = [7 - (parseInt(to[1]) -1), ['a','b','c','d','e','f','g','h'].indexOf(to[0])];
-    
-    fromBoard = board[fromCoor[0]][fromCoor[1]]
-    toBoard = board[toCoor[0]][toCoor[1]]
+        fromCoor = [7 - (parseInt(from[1]) -1), ['a','b','c','d','e','f','g','h'].indexOf(from[0])];
+        toCoor = [7 - (parseInt(to[1]) -1), ['a','b','c','d','e','f','g','h'].indexOf(to[0])];
+        
+        fromBoard = board[fromCoor[0]][fromCoor[1]]
+        toBoard = board[toCoor[0]][toCoor[1]]
 
-    if (toBoard) {
-        const img = document.createElement("img");
-        img.src = pieces[board[toCoor[0]][toCoor[1]]]
-        img.classList.add('w-[18.75px]', 'md:w-[25px]')
+        if (toBoard) {
+            const img = document.createElement("img");
+            img.src = pieces[board[toCoor[0]][toCoor[1]]]
+            img.classList.add('w-[18.75px]', 'md:w-[25px]')
 
-        if (board[toCoor[0]][toCoor[1]].includes('white')) {
-            document.getElementById('taken-pieces-black').append(img)
-        } else {
-            document.getElementById('taken-pieces-white').append(img)
+            if (board[toCoor[0]][toCoor[1]].includes('white')) {
+                document.getElementById('taken-pieces-black').append(img)
+            } else {
+                document.getElementById('taken-pieces-white').append(img)
+            }
+
+            taken.push(toBoard)
+            board[toCoor[0]][toCoor[1]] = ""
         }
 
-        taken.push(toBoard)
-        board[toCoor[0]][toCoor[1]] = ""
-    }
 
+        board[fromCoor[0]][fromCoor[1]] = ""    
+        board[toCoor[0]][toCoor[1]] = fromBoard
+        
+        displayBoard()
 
-    board[fromCoor[0]][fromCoor[1]] = ""    
-    board[toCoor[0]][toCoor[1]] = fromBoard
-    
-    displayBoard()
+        if ([0,7].includes(toCoor[0]) && fromBoard.includes('Pawn')) {
 
-    if ([0,7].includes(toCoor[0]) && fromBoard.includes('Pawn')) {
+            const div = document.createElement("div");
+            div.id = 'pawn-promotion';
+            div.classList.add('drop-shadow-xl', 'w-full', 'h-[150px]', 'md:h-[200px]', 'absolute', `${whosMove === 'white' ? 'top' : 'bottom'}-0`, 'left-0', 'bg-[rgba(34,34,34,0.8)]', 'z-[10]', 'grid', 'grid-rows-[repeat(4,1fr)]', 'border', 'border-white');
 
-        const div = document.createElement("div");
-        div.id = 'pawn-promotion';
-        div.classList.add('drop-shadow-xl', 'w-full', 'h-[150px]', 'md:h-[200px]', 'absolute', `${whosMove === 'white' ? 'top' : 'bottom'}-0`, 'left-0', 'bg-[rgba(34,34,34,0.8)]', 'z-[10]', 'grid', 'grid-rows-[repeat(4,1fr)]', 'border', 'border-white');
+            const promotionPieces = [`${whosMove}Queen`, `${whosMove}Knight`, `${whosMove}Rook`, `${whosMove}Bishop`];
 
-        const promotionPieces = [`${whosMove}Queen`, `${whosMove}Knight`, `${whosMove}Rook`, `${whosMove}Bishop`];
+            promotionPieces.forEach((piece) => {
+                const img = document.createElement("img");
+                img.id = piece
+                img.src = pieces[piece]
+                img.classList.add('w-full')
 
-        promotionPieces.forEach((piece) => {
-            const img = document.createElement("img");
-            img.id = piece
-            img.src = pieces[piece]
-            img.classList.add('w-full')
+                img.addEventListener('click', function() {
+                    board[toCoor[0]][toCoor[1]] = piece
 
-            img.addEventListener('click', function() {
-                board[toCoor[0]][toCoor[1]] = piece
+                    if (toBoard) {
+                        simplifiedNotation.push(`${from[0]}x${to.join('')}=${{'Rook':'R','Knight':'N','Bishop':'B','Queen':'Q'}[piece.replace('white','').replace('black','')]}`)
+                    } else {
+                        simplifiedNotation.push(`${to.join('')}=${{'Rook':'R','Knight':'N','Bishop':'B','Queen':'Q'}[piece.replace('white','').replace('black','')]}`)
+                    }
 
-                if (toBoard) {
-                    simplifiedNotation.push(`${from[0]}x${to.join('')}=${{'Rook':'R','Knight':'N','Bishop':'B','Queen':'Q'}[piece.replace('white','').replace('black','')]}`)
-                } else {
-                    simplifiedNotation.push(`${to.join('')}=${{'Rook':'R','Knight':'N','Bishop':'B','Queen':'Q'}[piece.replace('white','').replace('black','')]}`)
+                    console.log(formatPgn(groupNotation(simplifiedNotation)))
+                    document.getElementById('notation').innerText = formatPgn(groupNotation(simplifiedNotation))
+                    document.getElementById('fen-output').innerText = pgn2fen().join('\n')
+                    document.getElementById('fen-output').parentElement.classList.remove('hidden')
+
+                    if (fromBoard.includes('white')) whosMove = 'black';
+                    if (fromBoard.includes('black')) whosMove = 'white';
+
+                    displayBoard()
+                })
+
+                div.append(img)
+            });
+
+            document.querySelector(`.${to.join('')}`).append(div)
+
+        } else {
+
+            if (fromBoard.includes('Pawn')) {
+                simplifiedNotation.push(`${toBoard ? `${from[0]}x` : ''}${to.join('')}`)
+            } else if (fromBoard.includes('Rook')) {
+                simplifiedNotation.push(`R${toBoard ? 'x' : ''}${to.join('')}`)
+            } else if (fromBoard.includes('Knight')) {
+                simplifiedNotation.push(`N${toBoard ? 'x' : ''}${to.join('')}`)
+            } else if (fromBoard.includes('Bishop')) {
+                simplifiedNotation.push(`B${toBoard ? 'x' : ''}${to.join('')}`)
+            } else if (fromBoard.includes('Queen')) {
+                simplifiedNotation.push(`Q${toBoard ? 'x' : ''}${to.join('')}`)
+            } else if (fromBoard.includes('King')) {
+                simplifiedNotation.push(`K${toBoard ? 'x' : ''}${to.join('')}`)
+            }
+        
+            console.log(formatPgn(groupNotation(simplifiedNotation)))
+            document.getElementById('notation').innerText = formatPgn(groupNotation(simplifiedNotation))
+            document.getElementById('fen-output').innerText = pgn2fen().join('\n')
+            document.getElementById('fen-output').parentElement.classList.remove('hidden')
+
+            if (fromBoard.includes('white')) whosMove = 'black';
+            if (fromBoard.includes('black')) whosMove = 'white';
+
+            displayBoard()
+        }
+
+        // Evaluation
+
+        if (document.getElementById('show-evaluations').checked) {
+
+            const fen = pgn2fen()
+
+            fetch(evaluationAPI + `?fen=${fen[fen.length-2]}&depth=5&mode=eval`)
+            .then(response => {
+                if (!response.ok) {
+                throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
+            .then(data => {
+
+                if (data.success) {
+                    document.getElementById('evaluation').innerHTML = data.data
                 }
 
-                console.log(formatPgn(groupNotation(simplifiedNotation)))
-                document.getElementById('notation').innerText = formatPgn(groupNotation(simplifiedNotation))
-                document.getElementById('fen-output').innerText = pgn2fen().join('\n')
-                document.getElementById('fen-output').parentElement.classList.remove('hidden')
-
-                if (fromBoard.includes('white')) whosMove = 'black';
-                if (fromBoard.includes('black')) whosMove = 'white';
-
-                displayBoard()
             })
-
-            div.append(img)
-        });
-
-        document.querySelector(`.${to.join('')}`).append(div)
-
-    } else {
-
-        if (fromBoard.includes('Pawn')) {
-            simplifiedNotation.push(`${toBoard ? `${from[0]}x` : ''}${to.join('')}`)
-        } else if (fromBoard.includes('Rook')) {
-            simplifiedNotation.push(`R${toBoard ? 'x' : ''}${to.join('')}`)
-        } else if (fromBoard.includes('Knight')) {
-            simplifiedNotation.push(`N${toBoard ? 'x' : ''}${to.join('')}`)
-        } else if (fromBoard.includes('Bishop')) {
-            simplifiedNotation.push(`B${toBoard ? 'x' : ''}${to.join('')}`)
-        } else if (fromBoard.includes('Queen')) {
-            simplifiedNotation.push(`Q${toBoard ? 'x' : ''}${to.join('')}`)
-        } else if (fromBoard.includes('King')) {
-            simplifiedNotation.push(`K${toBoard ? 'x' : ''}${to.join('')}`)
         }
-    
-        console.log(formatPgn(groupNotation(simplifiedNotation)))
-        document.getElementById('notation').innerText = formatPgn(groupNotation(simplifiedNotation))
-        document.getElementById('fen-output').innerText = pgn2fen().join('\n')
-        document.getElementById('fen-output').parentElement.classList.remove('hidden')
 
-        if (fromBoard.includes('white')) whosMove = 'black';
-        if (fromBoard.includes('black')) whosMove = 'white';
 
-        displayBoard()
+        // Stockfish
+        if (!checkmate) {
+            if (whosMove === 'white' && whitePlayer === 'stockfish' || whosMove === 'black' && blackPlayer === 'stockfish') {
+                stockfish()
+            }
+        }
+
+        const fen = pgn2fen()
+        checkmate = isCheckMate(fen[fen.length-2])
+
+        if (checkmate) displayBoard();
     }
 
 }
@@ -454,15 +498,17 @@ function displayBoard() {
 
                 square.innerHTML = `<img src="${pieces[board[y][x]]}"  alt="${board[y][x]}">`;
 
-                if (board[y][x].includes('white') && whitePlayer === 'human' || board[y][x].includes('black') && blackPlayer === 'human') {
-                    square.addEventListener("click", (e) => {
-                        selectedPeice = `${xx}${yy}`
-                        const legalMoves = getLegalMoves(selectedPeice);
-                        displayLegalMoves(legalMoves);
-                    });
-
-                    if (board[y][x].includes('white') && whosMove === 'white' || board[y][x].includes('black') && whosMove === 'black') {
-                        square.classList.add('cursor-pointer')
+                if (!checkmate) {
+                    if (board[y][x].includes('white') && whitePlayer === 'human' || board[y][x].includes('black') && blackPlayer === 'human') {
+                        square.addEventListener("click", (e) => {
+                            selectedPeice = `${xx}${yy}`
+                            const legalMoves = getLegalMoves(selectedPeice);
+                            displayLegalMoves(legalMoves);
+                        });
+    
+                        if (board[y][x].includes('white') && whosMove === 'white' || board[y][x].includes('black') && whosMove === 'black') {
+                            square.classList.add('cursor-pointer')
+                        }
                     }
                 }
             }
@@ -470,4 +516,19 @@ function displayBoard() {
         }
         
     }
+
+    if (checkmate) {
+        const chessboard = document.getElementById('chessboard')
+
+        const div = document.createElement('div')
+        div.classList.add('absolute', 'w-full', 'z-10', 'top-0', 'left-0', 'flex', 'h-full', 'bg-[rgba(0,0,0,0.5)]')
+
+        div.innerHTML = `
+        <div class="w-full bg-[rgba(0,0,0,0.8)] self-center text-center py-5 text-white">${whosMove === 'white' ? 'Black' : 'White'} wins</div>
+        `
+
+        chessboard.append(div)
+
+    }
+
 }

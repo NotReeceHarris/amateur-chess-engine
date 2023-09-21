@@ -206,21 +206,16 @@
 
 <script src="/src/js/chess.js/dist/esm/chess.js"></script>
 <script src="/src/js/engines.js"></script>
-<script src="/src/js/game.js"></script>
-
-<script>
-    const chess = new Chess()
-    chess.loadPgn(formatPgn(groupNotation(simplifiedNotation)))
-</script>
+<script src="/src/js/gamev2.js"></script>
 
 <script>
 
-console.log(isCheckMate('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3'))
-</script>
-
-<script>
 
 (() => {
+displayBoard()
+})()
+
+/*(() => {
     const statusElement = document.getElementById('evaluation-api');
     const stockfishStatusElement = document.getElementById('stockfish-api');
     const settingsButton = document.getElementById('settings');
@@ -322,7 +317,7 @@ console.log(isCheckMate('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq 
             stockfishStatusElement.classList.add('text-red-400')
         });
 
-})();
+})(); */
 
 </script>
 
