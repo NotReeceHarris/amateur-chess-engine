@@ -8,7 +8,7 @@
     <title>Chess | Next-Level Chess Web App</title>
     <meta name="description" content="Challenge Friends, Test Your Skills Against AI, and Watch AI Showdowns. Explore Customization with our User-Friendly Plugin System to Run Your Own Chess Engines.">
     <link rel="canonical" href="https://chess.reeceharris.net/">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@100;400&display=swap" rel="stylesheet">
     <style>*{font-family: 'Roboto Mono', monospace;}</style>
 </head>
 
@@ -86,138 +86,94 @@
 
     </div>
 
-    <div class="overflow-y-hidden flex flex-col justify-center w-screen h-screen">
+    <div class="flex flex-col justify-center w-screen h-screen">
         <div class="self-center relative flex flex-col gap-6">
 
             <div class="flex gap-6 w-[300px] md:w-[400px] mx-auto min-h-[18.75px] md:min-h-[25px]">
-                <div id="taken-pieces-white" class="grid grid-cols-[repeat(8,1fr)]"></div>
-                <div id="taken-pieces-black" class="grid grid-cols-[repeat(8,1fr)]"></div>
+                <div id="taken-pieces-white" class="w-full grid grid-cols-[repeat(4,1fr)] md:grid-cols-[repeat(8,1fr)]"></div>
+                <div id="taken-pieces-black" class="w-full grid grid-cols-[repeat(4,1fr)] md:grid-cols-[repeat(8,1fr)]"></div>
             </div>
 
             <div>
-                <div class="grid grid-cols-[repeat(10,1fr)] text-center w-full text-white mb-2">
-                    <span> </span>
-                    <span>A</span>
-                    <span>B</span>
-                    <span>C</span>
-                    <span>D</span>
-                    <span>E</span>
-                    <span>F</span>
-                    <span>G</span>
-                    <span>H</span>
-                    <span> </span>
-                </div>
                 <div class="flex">
-                    <div class="grid grid-rows-[repeat(8,1fr)] text-center h-[300px] md:h-[400px] text-white w-[37.5px] md:w-[50px]">
-                        <span class="flex justify-center self-center">8</span>
-                        <span class="flex justify-center self-center">7</span>
-                        <span class="flex justify-center self-center">6</span>
-                        <span class="flex justify-center self-center">5</span>
-                        <span class="flex justify-center self-center">4</span>
-                        <span class="flex justify-center self-center">3</span>
-                        <span class="flex justify-center self-center">2</span>
-                        <span class="flex justify-center self-center">1</span>
-                    </div>
                     <div id="chessboard" class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] grid grid-rows-[repeat(8,1fr)] grid-cols-[repeat(8,1fr)]">
-                        <div id="a8" class="bg-white relative"></div>
-                        <div id="b8" class="relative"></div>
-                        <div id="c8" class="bg-white relative"></div>
-                        <div id="d8" class="relative"></div>
-                        <div id="e8" class="bg-white relative"></div>
-                        <div id="f8" class="relative"></div>
-                        <div id="g8" class="bg-white relative"></div>
-                        <div id="h8" class="relative"></div>
+                        <div id="a8" class="bg-white relative flex"></div>
+                        <div id="b8" class="relative flex"></div>
+                        <div id="c8" class="bg-white relative flex"></div>
+                        <div id="d8" class="relative flex"></div>
+                        <div id="e8" class="bg-white relative flex"></div>
+                        <div id="f8" class="relative flex"></div>
+                        <div id="g8" class="bg-white relative flex"></div>
+                        <div id="h8" class="relative flex"></div>
     
-                        <div id="a7" class="relative"></div>
-                        <div id="b7" class="bg-white relative"></div>
-                        <div id="c7" class="relative"></div>
-                        <div id="d7" class="bg-white relative"></div>
-                        <div id="e7" class="relative"></div>
-                        <div id="f7" class="bg-white relative"></div>
-                        <div id="g7" class="relative"></div>
-                        <div id="h7" class="bg-white relative"></div>
+                        <div id="a7" class="relative flex"></div>
+                        <div id="b7" class="bg-white relative flex"></div>
+                        <div id="c7" class="relative flex"></div>
+                        <div id="d7" class="bg-white relative flex"></div>
+                        <div id="e7" class="relative flex"></div>
+                        <div id="f7" class="bg-white relative flex"></div>
+                        <div id="g7" class="relative flex"></div>
+                        <div id="h7" class="bg-white relative flex"></div>
     
-                        <div id="a6" class="bg-white relative"></div>
-                        <div id="b6" class="relative"></div>
-                        <div id="c6" class="bg-white relative"></div>
-                        <div id="d6" class="relative"></div>
-                        <div id="e6" class="bg-white relative"></div>
-                        <div id="f6" class="relative"></div>
-                        <div id="g6" class="bg-white relative"></div>
-                        <div id="h6" class="relative"></div>
+                        <div id="a6" class="bg-white relative flex"></div>
+                        <div id="b6" class="relative flex"></div>
+                        <div id="c6" class="bg-white relative flex"></div>
+                        <div id="d6" class="relative flex"></div>
+                        <div id="e6" class="bg-white relative flex"></div>
+                        <div id="f6" class="relative flex"></div>
+                        <div id="g6" class="bg-white relative flex"></div>
+                        <div id="h6" class="relative flex"></div>
                         
-                        <div id="a5" class="relative"></div>
-                        <div id="b5" class="bg-white relative"></div>
-                        <div id="c5" class="relative"></div>
-                        <div id="d5" class="bg-white relative"></div>
-                        <div id="e5" class="relative"></div>
-                        <div id="f5" class="bg-white relative"></div>
-                        <div id="g5" class="relative"></div>
-                        <div id="h5" class="bg-white relative"></div>
+                        <div id="a5" class="relative flex"></div>
+                        <div id="b5" class="bg-white relative flex"></div>
+                        <div id="c5" class="relative flex"></div>
+                        <div id="d5" class="bg-white relative flex"></div>
+                        <div id="e5" class="relative flex"></div>
+                        <div id="f5" class="bg-white relative flex"></div>
+                        <div id="g5" class="relative flex"></div>
+                        <div id="h5" class="bg-white relative flex"></div>
     
-                        <div id="a4" class="bg-white relative"></div>
-                        <div id="b4" class="relative"></div>
-                        <div id="c4" class="bg-white relative"></div>
-                        <div id="d4" class="relative"></div>
-                        <div id="e4" class="bg-white relative"></div>
-                        <div id="f4" class="relative"></div>
-                        <div id="g4" class="bg-white relative"></div>
-                        <div id="h4" class="relative"></div>
+                        <div id="a4" class="bg-white relative flex"></div>
+                        <div id="b4" class="relative flex"></div>
+                        <div id="c4" class="bg-white relative flex"></div>
+                        <div id="d4" class="relative flex"></div>
+                        <div id="e4" class="bg-white relative flex"></div>
+                        <div id="f4" class="relative flex"></div>
+                        <div id="g4" class="bg-white relative flex"></div>
+                        <div id="h4" class="relative flex"></div>
     
-                        <div id="a3" class="relative"></div>
-                        <div id="b3" class="bg-white relative"></div>
-                        <div id="c3" class="relative"></div>
-                        <div id="d3" class="bg-white relative"></div>
-                        <div id="e3" class="relative"></div>
-                        <div id="f3" class="bg-white relative"></div>
-                        <div id="g3" class="relative"></div>
-                        <div id="h3" class="bg-white relative"></div>
+                        <div id="a3" class="relative flex"></div>
+                        <div id="b3" class="bg-white relative flex"></div>
+                        <div id="c3" class="relative flex"></div>
+                        <div id="d3" class="bg-white relative flex"></div>
+                        <div id="e3" class="relative flex"></div>
+                        <div id="f3" class="bg-white relative flex"></div>
+                        <div id="g3" class="relative flex"></div>
+                        <div id="h3" class="bg-white relative flex"></div>
     
-                        <div id="a2" class="bg-white relative"></div>
-                        <div id="b2" class="relative"></div>
-                        <div id="c2" class="bg-white relative"></div>
-                        <div id="d2" class="relative"></div>
-                        <div id="e2" class="bg-white relative"></div>
-                        <div id="f2" class="relative"></div>
-                        <div id="g2" class="bg-white relative"></div>
-                        <div id="h2" class="relative"></div>
+                        <div id="a2" class="bg-white relative flex"></div>
+                        <div id="b2" class="relative flex"></div>
+                        <div id="c2" class="bg-white relative flex"></div>
+                        <div id="d2" class="relative flex"></div>
+                        <div id="e2" class="bg-white relative flex"></div>
+                        <div id="f2" class="relative flex"></div>
+                        <div id="g2" class="bg-white relative flex"></div>
+                        <div id="h2" class="relative flex"></div>
     
-                        <div id="a1" class="relative"></div>
-                        <div id="b1" class="bg-white relative"></div>
-                        <div id="c1" class="relative"></div>
-                        <div id="d1" class="bg-white relative"></div>
-                        <div id="e1" class="relative"></div>
-                        <div id="f1" class="bg-white relative"></div>
-                        <div id="g1" class="relative"></div>
-                        <div id="h1" class="bg-white relative"></div>
+                        <div id="a1" class="relative flex"></div>
+                        <div id="b1" class="bg-white relative flex"></div>
+                        <div id="c1" class="relative flex"></div>
+                        <div id="d1" class="bg-white relative flex"></div>
+                        <div id="e1" class="relative flex"></div>
+                        <div id="f1" class="bg-white relative flex"></div>
+                        <div id="g1" class="relative flex"></div>
+                        <div id="h1" class="bg-white relative flex"></div>
                     </div>
-                    <div class="grid grid-rows-[repeat(8,1fr)] text-center h-[300px] md:h-[400px] text-white w-[37.5px] md:w-[50px]">
-                        <span class="flex justify-center self-center">8</span>
-                        <span class="flex justify-center self-center">7</span>
-                        <span class="flex justify-center self-center">6</span>
-                        <span class="flex justify-center self-center">5</span>
-                        <span class="flex justify-center self-center">4</span>
-                        <span class="flex justify-center self-center">3</span>
-                        <span class="flex justify-center self-center">2</span>
-                        <span class="flex justify-center self-center">1</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-[repeat(10,1fr)] text-center w-full text-white mt-2">
-                    <span> </span>
-                    <span>A</span>
-                    <span>B</span>
-                    <span>C</span>
-                    <span>D</span>
-                    <span>E</span>
-                    <span>F</span>
-                    <span>G</span>
-                    <span>H</span>
-                    <span> </span>
                 </div>
             </div>
 
-            <div id="evaluation" class="text-white text-xs w-[300px] md:w-[400px] mx-auto"></div>
-            <div id="notation" class="text-white text-xs w-[300px] md:w-[400px] mx-auto"></div>
+            <div id="evaluation" class="text-white text-xs w-[300px] md:w-[400px] mx-auto">Total evaluation: 0.00 (white side)</div>
+            <div id="notation" class="bg-[#2e2d2d]  rounded-sm text-white text-xs w-[300px] md:w-[400px] mx-auto p-3 max-h-[200px] overflow-y-auto">1. </div>
         </div>
     </div>
 </body>
@@ -255,13 +211,15 @@
 
     const handleWhitePlayerChange = () => {
         whitePlayer = whitePlayerSelect.value;
-        if (whitePlayer === 'stockfish') stockfish();
+        if (whitePlayer === 'stockfish' && whosMove === 'w') engineMove();
+        if (whitePlayer === 'random' && whosMove === 'w') engineMove();
         refreshBoard();
     };
 
     const handleBlackPlayerChange = () => {
         blackPlayer = blackPlayerSelect.value;
-        if (blackPlayer === 'stockfish') stockfish();
+        if (blackPlayer === 'stockfish' && whosMove === 'b') engineMove();
+        if (blackPlayer === 'random' && whosMove === 'b') engineMove();
         refreshBoard();
     };
 

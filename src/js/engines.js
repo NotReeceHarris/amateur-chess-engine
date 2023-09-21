@@ -1,44 +1,65 @@
 async function stockfish () {
 
-    if (!chess.isCheckmate()) {
-        if (whosMove === 'white' && whitePlayer === 'stockfish' || whosMove === 'black' && blackPlayer === 'stockfish') {
-
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    console.log(whosMove, 'Stockfishes move')
-
-        const fen = pgn2fen()
-
-        fetch(evaluationAPI + `?fen=${fen[fen.length-2]}&depth=5&mode=bestmove`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            return response.json();
-        })
-        .then((data) => {
-
-            console.log(data)
-
-            if (data.success) {
-
-                let move = data.data.replace('bestmove ','')
-                if (move.includes('ponder')) move = move.split(' ponder ')[0];
-
-                console.log(move)
-
-                const positions = {
-                    from: move.substring(0, 2),
-                    to: move.substring(2)
+    const makeRequest = async (fen, player) => {
+        const depth = 7;
+        
+        const xhr = new XMLHttpRequest();
+        const timeoutDuration = 3000;
+        
+        try {
+            xhr.onreadystatechange = async function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                let move = data.data;
+                                move = move.replace('bestmove ', '');
+                                if (move.includes('ponder')) move = move.split('ponder')[0].trim();
+    
+                                console.log(move, '|', data.data, '|', whosMove, '|', fen);
+    
+                                chess.move(move);
+                                updateStats();
+    
+                                whosMove = whosMove === 'w' ? 'b' : 'w';
+                                refreshBoard();
+                                engineMove();
+                        } else {
+                            console.log('Error in response:', data);
+                        }
+                    }
                 }
-
-                selectedPeice = positions.from
-                movePeice(positions.from, positions.to)
-
-            }
-        }).catch((error) => {
+            };
+            
+            xhr.open('GET', `${evaluationAPI}?fen=${fen}&depth=${depth}&mode=bestmove`, true);
+            xhr.timeout = timeoutDuration;
+            xhr.addEventListener('timeout', function () {
+                makeRequest(fen, player);
+                xhr.abort();
+            });
+            
+            xhr.send();
+        } catch (error) {
             console.log(error)
-        })
+        }
+    }
+
+    if (!chess.isGameOver() && (whosMove === 'w' && whitePlayer === 'stockfish' || whosMove === 'b' && blackPlayer === 'stockfish')) {
+        makeRequest(chess.fen(), whosMove);
     }
 }
+
+async function random() {
+    if (!chess.isGameOver() && (whosMove === 'w' && whitePlayer === 'random' || whosMove === 'b' && blackPlayer === 'random')) {
+        console.log('random')
+        await new Promise(r => setTimeout(r, 100));
+
+        const moves = chess.moves();
+        const move = moves[Math.floor(Math.random() * moves.length)];
+        chess.move(move);
+        updateStats();
+        whosMove = whosMove === 'w' ? 'b' : 'w';
+        refreshBoard();
+        engineMove();
+    }
 }

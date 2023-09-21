@@ -59,6 +59,45 @@ function extractPosition(moves) {
     return positions;
 }
 
+function engineMove () {
+    if (!chess.isGameOver() && (whosMove === 'w' && whitePlayer === 'stockfish' || whosMove === 'b' && blackPlayer === 'stockfish')) {
+        stockfish()
+    };
+
+    if (!chess.isGameOver() && (whosMove === 'w' && whitePlayer === 'random' || whosMove === 'b' && blackPlayer === 'random')) {
+        random()
+    };
+}
+
+function updateStats() {
+    document.getElementById('notation').innerText = chess.pgn()
+    document.getElementById('fen-output').innerText = chess.history({ verbose: true }).map((history) => {return history.after}).join('\n')
+    document.getElementById('fen-output').parentElement.classList.remove('hidden')
+
+    if (document.getElementById('show-evaluations').checked) {
+        const history = chess.history({ verbose: true })
+
+        fetch(evaluationAPI + `?fen=${history[history.length-1].after}&depth=1&mode=eval`)
+        .then(response => {
+            if (!response.ok) {
+            throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                document.getElementById('evaluation').innerText = data.data
+            } else {
+                document.getElementById('evaluation').innerText = 'N/A'
+            }
+        })
+        .catch(error => {
+            console.log(error)
+        });
+    }
+
+}
+
 function displayLegalMoves (legalMoves) {
 
     refreshBoard()
@@ -111,33 +150,8 @@ function displayLegalMoves (legalMoves) {
                         chess.move(
                             (chess.board()[toCoor[0]][toCoor[1]] ? selectedPeice.split('')[0] + 'x' : '') + move + '=' + piece.toUpperCase()
                         )
-
-                        if (document.getElementById('show-evaluations').checked) {
-                            const history = chess.history({ verbose: true })
             
-                            fetch(evaluationAPI + `?fen=${history[history.length-1].after}&depth=1&mode=eval`)
-                            .then(response => {
-                                if (!response.ok) {
-                                throw new Error("Network response was not ok");
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                if (data.success) {
-                                    document.getElementById('evaluation').innerText = data.data
-                                } else {
-                                    document.getElementById('evaluation').innerText = 'N/A'
-                                }
-                            })
-                            .catch(error => {
-                                console.log(error)
-                            });
-                        }
-            
-                        document.getElementById('notation').innerText = chess.pgn()
-                        document.getElementById('fen-output').innerText = chess.history({ verbose: true }).map((history) => {return history.after}).join('\n')
-                        document.getElementById('fen-output').parentElement.classList.remove('hidden')
-
+                        updateStats()
                         refreshBoard();
                     })
 
@@ -145,38 +159,17 @@ function displayLegalMoves (legalMoves) {
                 });
 
                 document.querySelector(`.${move}`).append(div)
+
+                engineMove();
                 return;
             }
 
             chess.move({ from: selectedPeice, to: move })
 
-            if (document.getElementById('show-evaluations').checked) {
-                const history = chess.history({ verbose: true })
-
-                fetch(evaluationAPI + `?fen=${history[history.length-1].after}&depth=1&mode=eval`)
-                .then(response => {
-                    if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('evaluation').innerText = data.data
-                    } else {
-                        document.getElementById('evaluation').innerText = 'N/A'
-                    }
-                })
-                .catch(error => {
-                    console.log(error)
-                });
-            }
-
-            document.getElementById('notation').innerText = chess.pgn()
-            document.getElementById('fen-output').innerText = chess.history({ verbose: true }).map((history) => {return history.after}).join('\n')
-            document.getElementById('fen-output').parentElement.classList.remove('hidden')
+            updateStats()
 
             refreshBoard();
+            engineMove();
         });
 
         clone.classList.add("cursor-pointer");
@@ -194,7 +187,20 @@ function refreshBoard(events=true) {
             const xx = ['a','b','c','d','e','f','g','h'][x]
 
             const square = document.getElementById(`${xx}${yy}`);
-            square.innerHTML = "";
+            square.innerHTML = ''
+
+            if (yy === 1) {
+                const letter = document.createElement('div')
+                letter.innerText = xx
+                letter.classList.add('absolute', 'bottom-0', 'right-0.5', `text-${ x % 2 != 0 ? '[#222222]' : 'white' }`, 'text-[5px]', 'md:text-[10px]')
+                square.append(letter)
+            }
+            if (xx === 'a') {
+                const number = document.createElement('div')
+                number.innerText = yy
+                number.classList.add('absolute', 'top-0', 'left-0.5', `text-${ yy % 2 === 0 ? '[#222222]' : 'white' }`, 'text-[5px]', 'md:text-[10px]')
+                square.append(number)
+            }
 
             const clone = square.cloneNode(true);
             square.replaceWith(clone);
@@ -216,6 +222,8 @@ function refreshBoard(events=true) {
 
                 const img = document.createElement('img')
                 img.src = pieces[piece.type][piece.color]
+
+                img.classList.add('w-[70%]', 'mx-auto', 'self-center')
 
                 if (!chess.isCheckmate()) {
                     if (piece.color === 'w' && whitePlayer === 'human' || piece.color === 'b' && blackPlayer === 'human') {
@@ -242,7 +250,7 @@ function refreshBoard(events=true) {
         div.classList.add('absolute', 'w-full', 'z-10', 'top-0', 'left-0', 'flex', 'h-full', 'bg-[rgba(0,0,0,0.5)]')
 
         div.innerHTML = `
-            <div class="w-full bg-[rgba(0,0,0,0.8)] self-center text-center py-5 text-white">${whosMove === 'w' ? 'Black' : 'White'} ${chess.isCheckmate() ? 'wins' : (chess.isStalemate() ? 'stalemate' : 'draw' )}</div>
+            <div class="w-full bg-[rgba(0,0,0,0.8)] self-center text-center py-5 text-white"> ${chess.isCheckmate() ? `${whosMove === 'w' ? 'Black' : 'White'} Wins` : chess.isStalemate() ? 'Stalemate' : 'Draw'}</div>
         `
 
         chessboard.append(div)
