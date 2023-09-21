@@ -10,8 +10,8 @@
     <link rel="canonical" href="https://chess.reeceharris.net/">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
     <style>*{font-family: 'Roboto Mono', monospace;}</style>
-
 </head>
+
 <body class="bg-[#222222]">
 
     <div id="settings" class="text-white fixed bottom-5 right-5 z-[101] cursor-pointer bg-[#2e2d2d] p-1.5 rounded-md">
@@ -33,43 +33,37 @@
                         <label for="HeadlineAct" class="block text-sm font-medium text-white">
                           White
                         </label>
-                      
-                        <select
-                            id="white-player"
-                          class="rounded-sm mt-1.5 px-3 py-2 bg-[#222222] border border-white text-white sm:text-sm w-full"
-                        >
+
+                        <select id="white-player" class="rounded-sm mt-1.5 px-3 py-2 bg-[#222222] border border-white text-white sm:text-sm w-full">
                           <option value="human">Human</option>
                           <option value="random">Random move</option>
                           <option value="stockfish">Stockfish</option>
                         </select>
-                      </div>
-        
-                      <div class="w-full">
+                    </div>
+
+                    <div class="w-full">
                         <label for="HeadlineAct" class="block text-sm font-medium text-white">
                           Black
                         </label>
-                      
-                        <select
-                            id="black-player"
-                          class="rounded-sm mt-1.5 px-3 py-2 bg-[#222222] border border-white text-white sm:text-sm w-full"
-                        >
-                            <option value="human">Human</option>
+
+                        <select id="black-player" class="rounded-sm mt-1.5 px-3 py-2 bg-[#222222] border border-white text-white sm:text-sm w-full">
+                            <option selected value="human">Human</option>
                             <option value="random">Random move</option>
-                            <option selected value="stockfish">Stockfish</option>
+                            <option value="stockfish">Stockfish</option>
                         </select>
-                      </div>
+                    </div>
                 </div>
-    
+
                 <div class="flex items-center w-full max-w-[400px] mx-auto ">
                     <input id="show-pgn" type="checkbox" value="pgn" checked class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
                     <label for="show-pgn" class="ml-2 text-sm font-medium text-white">Show PGN</label>
                 </div>
-    
+
                 <div class="flex items-center w-full max-w-[400px] mx-auto ">
                     <input id="show-taken" type="checkbox" value="taken" checked class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
                     <label for="show-taken" class="ml-2 text-sm font-medium text-white">Show taken pieces</label>
                 </div>
-    
+
                 <div class="flex items-center w-full max-w-[400px] mx-auto ">
                     <input id="show-evaluations" type="checkbox" value="taken" checked class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
                     <label for="show-evaluations" class="ml-2 text-sm font-medium text-white">Show evaluations</label>
@@ -84,7 +78,7 @@
                 <span class="text-white text-xs">Evaluation API: <span id="evaluation-api" class="text-gray-400">Requesting</span></span>
                 <span class="text-white text-xs">Stockfish API: <span id="stockfish-api" class="text-gray-400">Requesting</span></span>
             </div>
-    
+
             <div class="hidden overflow-x-auto overflow-y-hidden max-w-[400px] min-h-max h-max mx-auto p-3 bg-[#2e2d2d] rounded-sm w-full text-white text-xs">
                 <p class="whitespace-pre" id="fen-output"></p>
             </div>
@@ -93,130 +87,145 @@
     </div>
 
     <div class="overflow-y-hidden flex flex-col justify-center w-screen h-screen">
-        
+        <div class="self-center relative flex flex-col gap-6">
 
-        <div class="self-center relative">
-            <div id="evaluation" class="text-white text-xs w-[300px] md:w-[400px] mx-auto mb-5"></div>
-            <div id="taken-pieces-black" class="px-[2.3rem] h-[37.5px] md:h-[50px] grid grid-cols-[repeat(16,1fr)] w-full text-white"></div>
-            <div class="grid grid-cols-[repeat(10,1fr)] text-center w-full text-white mb-2">
-                <span> </span>
-                <span>A</span>
-                <span>B</span>
-                <span>C</span>
-                <span>D</span>
-                <span>E</span>
-                <span>F</span>
-                <span>G</span>
-                <span>H</span>
-                <span> </span>
+            <div class="flex gap-6 w-[300px] md:w-[400px] mx-auto min-h-[18.75px] md:min-h-[25px]">
+                <div id="taken-pieces-white" class="grid grid-cols-[repeat(8,1fr)]"></div>
+                <div id="taken-pieces-black" class="grid grid-cols-[repeat(8,1fr)]"></div>
             </div>
-            <div class="flex mb-5">
-                <div class="grid grid-rows-[repeat(8,1fr)] text-center h-[300px] md:h-[400px] text-white w-[37.5px] md:w-[50px]">
-                    <span class="flex justify-center self-center">8</span>
-                    <span class="flex justify-center self-center">7</span>
-                    <span class="flex justify-center self-center">6</span>
-                    <span class="flex justify-center self-center">5</span>
-                    <span class="flex justify-center self-center">4</span>
-                    <span class="flex justify-center self-center">3</span>
-                    <span class="flex justify-center self-center">2</span>
-                    <span class="flex justify-center self-center">1</span>
+
+            <div>
+                <div class="grid grid-cols-[repeat(10,1fr)] text-center w-full text-white mb-2">
+                    <span> </span>
+                    <span>A</span>
+                    <span>B</span>
+                    <span>C</span>
+                    <span>D</span>
+                    <span>E</span>
+                    <span>F</span>
+                    <span>G</span>
+                    <span>H</span>
+                    <span> </span>
                 </div>
-                <div id="chessboard" class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] grid grid-rows-[repeat(8,1fr)] grid-cols-[repeat(8,1fr)]">
-                    <div id="a8" class="bg-white relative"></div>
-                    <div id="b8" class="relative"></div>
-                    <div id="c8" class="bg-white relative"></div>
-                    <div id="d8" class="relative"></div>
-                    <div id="e8" class="bg-white relative"></div>
-                    <div id="f8" class="relative"></div>
-                    <div id="g8" class="bg-white relative"></div>
-                    <div id="h8" class="relative"></div>
-
-                    <div id="a7" class="relative"></div>
-                    <div id="b7" class="bg-white relative"></div>
-                    <div id="c7" class="relative"></div>
-                    <div id="d7" class="bg-white relative"></div>
-                    <div id="e7" class="relative"></div>
-                    <div id="f7" class="bg-white relative"></div>
-                    <div id="g7" class="relative"></div>
-                    <div id="h7" class="bg-white relative"></div>
-
-                    <div id="a6" class="bg-white relative"></div>
-                    <div id="b6" class="relative"></div>
-                    <div id="c6" class="bg-white relative"></div>
-                    <div id="d6" class="relative"></div>
-                    <div id="e6" class="bg-white relative"></div>
-                    <div id="f6" class="relative"></div>
-                    <div id="g6" class="bg-white relative"></div>
-                    <div id="h6" class="relative"></div>
-                    
-                    <div id="a5" class="relative"></div>
-                    <div id="b5" class="bg-white relative"></div>
-                    <div id="c5" class="relative"></div>
-                    <div id="d5" class="bg-white relative"></div>
-                    <div id="e5" class="relative"></div>
-                    <div id="f5" class="bg-white relative"></div>
-                    <div id="g5" class="relative"></div>
-                    <div id="h5" class="bg-white relative"></div>
-
-                    <div id="a4" class="bg-white relative"></div>
-                    <div id="b4" class="relative"></div>
-                    <div id="c4" class="bg-white relative"></div>
-                    <div id="d4" class="relative"></div>
-                    <div id="e4" class="bg-white relative"></div>
-                    <div id="f4" class="relative"></div>
-                    <div id="g4" class="bg-white relative"></div>
-                    <div id="h4" class="relative"></div>
-
-                    <div id="a3" class="relative"></div>
-                    <div id="b3" class="bg-white relative"></div>
-                    <div id="c3" class="relative"></div>
-                    <div id="d3" class="bg-white relative"></div>
-                    <div id="e3" class="relative"></div>
-                    <div id="f3" class="bg-white relative"></div>
-                    <div id="g3" class="relative"></div>
-                    <div id="h3" class="bg-white relative"></div>
-
-                    <div id="a2" class="bg-white relative"></div>
-                    <div id="b2" class="relative"></div>
-                    <div id="c2" class="bg-white relative"></div>
-                    <div id="d2" class="relative"></div>
-                    <div id="e2" class="bg-white relative"></div>
-                    <div id="f2" class="relative"></div>
-                    <div id="g2" class="bg-white relative"></div>
-                    <div id="h2" class="relative"></div>
-
-                    <div id="a1" class="relative"></div>
-                    <div id="b1" class="bg-white relative"></div>
-                    <div id="c1" class="relative"></div>
-                    <div id="d1" class="bg-white relative"></div>
-                    <div id="e1" class="relative"></div>
-                    <div id="f1" class="bg-white relative"></div>
-                    <div id="g1" class="relative"></div>
-                    <div id="h1" class="bg-white relative"></div>
+                <div class="flex">
+                    <div class="grid grid-rows-[repeat(8,1fr)] text-center h-[300px] md:h-[400px] text-white w-[37.5px] md:w-[50px]">
+                        <span class="flex justify-center self-center">8</span>
+                        <span class="flex justify-center self-center">7</span>
+                        <span class="flex justify-center self-center">6</span>
+                        <span class="flex justify-center self-center">5</span>
+                        <span class="flex justify-center self-center">4</span>
+                        <span class="flex justify-center self-center">3</span>
+                        <span class="flex justify-center self-center">2</span>
+                        <span class="flex justify-center self-center">1</span>
+                    </div>
+                    <div id="chessboard" class="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] grid grid-rows-[repeat(8,1fr)] grid-cols-[repeat(8,1fr)]">
+                        <div id="a8" class="bg-white relative"></div>
+                        <div id="b8" class="relative"></div>
+                        <div id="c8" class="bg-white relative"></div>
+                        <div id="d8" class="relative"></div>
+                        <div id="e8" class="bg-white relative"></div>
+                        <div id="f8" class="relative"></div>
+                        <div id="g8" class="bg-white relative"></div>
+                        <div id="h8" class="relative"></div>
+    
+                        <div id="a7" class="relative"></div>
+                        <div id="b7" class="bg-white relative"></div>
+                        <div id="c7" class="relative"></div>
+                        <div id="d7" class="bg-white relative"></div>
+                        <div id="e7" class="relative"></div>
+                        <div id="f7" class="bg-white relative"></div>
+                        <div id="g7" class="relative"></div>
+                        <div id="h7" class="bg-white relative"></div>
+    
+                        <div id="a6" class="bg-white relative"></div>
+                        <div id="b6" class="relative"></div>
+                        <div id="c6" class="bg-white relative"></div>
+                        <div id="d6" class="relative"></div>
+                        <div id="e6" class="bg-white relative"></div>
+                        <div id="f6" class="relative"></div>
+                        <div id="g6" class="bg-white relative"></div>
+                        <div id="h6" class="relative"></div>
+                        
+                        <div id="a5" class="relative"></div>
+                        <div id="b5" class="bg-white relative"></div>
+                        <div id="c5" class="relative"></div>
+                        <div id="d5" class="bg-white relative"></div>
+                        <div id="e5" class="relative"></div>
+                        <div id="f5" class="bg-white relative"></div>
+                        <div id="g5" class="relative"></div>
+                        <div id="h5" class="bg-white relative"></div>
+    
+                        <div id="a4" class="bg-white relative"></div>
+                        <div id="b4" class="relative"></div>
+                        <div id="c4" class="bg-white relative"></div>
+                        <div id="d4" class="relative"></div>
+                        <div id="e4" class="bg-white relative"></div>
+                        <div id="f4" class="relative"></div>
+                        <div id="g4" class="bg-white relative"></div>
+                        <div id="h4" class="relative"></div>
+    
+                        <div id="a3" class="relative"></div>
+                        <div id="b3" class="bg-white relative"></div>
+                        <div id="c3" class="relative"></div>
+                        <div id="d3" class="bg-white relative"></div>
+                        <div id="e3" class="relative"></div>
+                        <div id="f3" class="bg-white relative"></div>
+                        <div id="g3" class="relative"></div>
+                        <div id="h3" class="bg-white relative"></div>
+    
+                        <div id="a2" class="bg-white relative"></div>
+                        <div id="b2" class="relative"></div>
+                        <div id="c2" class="bg-white relative"></div>
+                        <div id="d2" class="relative"></div>
+                        <div id="e2" class="bg-white relative"></div>
+                        <div id="f2" class="relative"></div>
+                        <div id="g2" class="bg-white relative"></div>
+                        <div id="h2" class="relative"></div>
+    
+                        <div id="a1" class="relative"></div>
+                        <div id="b1" class="bg-white relative"></div>
+                        <div id="c1" class="relative"></div>
+                        <div id="d1" class="bg-white relative"></div>
+                        <div id="e1" class="relative"></div>
+                        <div id="f1" class="bg-white relative"></div>
+                        <div id="g1" class="relative"></div>
+                        <div id="h1" class="bg-white relative"></div>
+                    </div>
+                    <div class="grid grid-rows-[repeat(8,1fr)] text-center h-[300px] md:h-[400px] text-white w-[37.5px] md:w-[50px]">
+                        <span class="flex justify-center self-center">8</span>
+                        <span class="flex justify-center self-center">7</span>
+                        <span class="flex justify-center self-center">6</span>
+                        <span class="flex justify-center self-center">5</span>
+                        <span class="flex justify-center self-center">4</span>
+                        <span class="flex justify-center self-center">3</span>
+                        <span class="flex justify-center self-center">2</span>
+                        <span class="flex justify-center self-center">1</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-[repeat(10,1fr)] text-center w-full text-white mt-2">
+                    <span> </span>
+                    <span>A</span>
+                    <span>B</span>
+                    <span>C</span>
+                    <span>D</span>
+                    <span>E</span>
+                    <span>F</span>
+                    <span>G</span>
+                    <span>H</span>
+                    <span> </span>
                 </div>
             </div>
-            <div id="taken-pieces-white" class="px-[2.3rem] h-[37.5px] md:h-[50px] grid grid-cols-[repeat(16,1fr)] text-center w-full text-white"></div>
-            <div id="notation" class="px-[2.3rem] w-[375px] md:w-[500px] text-white text-xs"></div>
+
+            <div id="evaluation" class="text-white text-xs w-[300px] md:w-[400px] mx-auto"></div>
+            <div id="notation" class="text-white text-xs w-[300px] md:w-[400px] mx-auto"></div>
         </div>
     </div>
 </body>
 
-<script src="/src/js/fen.js"></script>
-
 
 <script src="/src/js/chess.js/dist/esm/chess.js"></script>
+<script src="/src/js/gamev2.js"></script>
 <script src="/src/js/engines.js"></script>
-<script src="/src/js/game.js"></script>
-
-<script>
-    const chess = new Chess()
-    chess.loadPgn(formatPgn(groupNotation(simplifiedNotation)))
-</script>
-
-<script>
-
-console.log(isCheckMate('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3'))
-</script>
 
 <script>
 
@@ -234,6 +243,7 @@ console.log(isCheckMate('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq 
     const evaluation = document.getElementById('evaluation');
     const notation = document.getElementById('notation');
     const showTakenCheckbox = document.getElementById('show-taken');
+
     const takenPiecesWhite = document.getElementById('taken-pieces-white');
     const takenPiecesBlack = document.getElementById('taken-pieces-black');
 
@@ -246,13 +256,13 @@ console.log(isCheckMate('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq 
     const handleWhitePlayerChange = () => {
         whitePlayer = whitePlayerSelect.value;
         if (whitePlayer === 'stockfish') stockfish();
-        displayBoard();
+        refreshBoard();
     };
 
     const handleBlackPlayerChange = () => {
         blackPlayer = blackPlayerSelect.value;
         if (blackPlayer === 'stockfish') stockfish();
-        displayBoard();
+        refreshBoard();
     };
 
     const togglePGN = () => {
@@ -286,7 +296,7 @@ console.log(isCheckMate('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq 
     toggleEvaluation();
     togglePGN();
     toggleTakenPieces();
-    displayBoard();
+    refreshBoard();
 
     fetch(evaluationAPI + '?fen=rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1&depth=1&mode=bestmove')
         .then(response => {

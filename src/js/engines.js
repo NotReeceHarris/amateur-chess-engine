@@ -1,6 +1,6 @@
 async function stockfish () {
 
-    if (!checkmate) {
+    if (!chess.isCheckmate()) {
         if (whosMove === 'white' && whitePlayer === 'stockfish' || whosMove === 'black' && blackPlayer === 'stockfish') {
 
     await new Promise(resolve => setTimeout(resolve, 1000))
