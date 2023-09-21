@@ -4,7 +4,7 @@ async function stockfish () {
         const depth = 7;
         
         const xhr = new XMLHttpRequest();
-        const timeoutDuration = 3000;
+        const timeoutDuration = 1000;
         
         try {
             xhr.onreadystatechange = async function () {
@@ -45,6 +45,7 @@ async function stockfish () {
     }
 
     if (!chess.isGameOver() && (whosMove === 'w' && whitePlayer === 'stockfish' || whosMove === 'b' && blackPlayer === 'stockfish')) {
+        await new Promise(r => setTimeout(r, 500));
         makeRequest(chess.fen(), whosMove);
     }
 }
@@ -52,7 +53,7 @@ async function stockfish () {
 async function random() {
     if (!chess.isGameOver() && (whosMove === 'w' && whitePlayer === 'random' || whosMove === 'b' && blackPlayer === 'random')) {
         console.log('random')
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 500));
 
         const moves = chess.moves();
         const move = moves[Math.floor(Math.random() * moves.length)];

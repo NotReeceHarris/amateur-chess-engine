@@ -33,7 +33,6 @@ let whitePlayer = 'human', blackPlayer = 'human', whosMove = 'w', selectedPeice;
 
 function extractPosition(moves) {
 
-    console.log(moves)
     let positions = [];
 
     for (let i = 0; i < moves.length; i++) {
@@ -74,6 +73,17 @@ function updateStats() {
     document.getElementById('fen-output').innerText = chess.history({ verbose: true }).map((history) => {return history.after}).join('\n')
     document.getElementById('fen-output').parentElement.classList.remove('hidden')
 
+    document.getElementById('taken-pieces-black').innerHTML = ''
+    document.getElementById('taken-pieces-white').innerHTML = ''
+
+    getTakenPieces().forEach((piece) => {
+        const img = document.createElement('img')
+        img.src = pieces[piece.piece][piece.color]
+        img.classList.add('w-[18.75px]', 'md:w-[25px]')
+        if (piece.color === 'w') document.getElementById('taken-pieces-black').append(img);
+        if (piece.color === 'b') document.getElementById('taken-pieces-white').append(img);
+    })
+
     if (document.getElementById('show-evaluations').checked) {
         const history = chess.history({ verbose: true })
 
@@ -95,6 +105,21 @@ function updateStats() {
             console.log(error)
         });
     }
+
+}
+
+function getTakenPieces() {
+    const taken = [];
+    const history = chess.history({ verbose: true })
+
+    history.forEach((move) => {
+        if (move.captured) taken.push({
+            piece: move.captured,
+            color: move.color === 'w' ? 'b' : 'w'
+        });
+    });
+
+    return taken
 
 }
 
@@ -122,15 +147,6 @@ function displayLegalMoves (legalMoves) {
             const fromCoor = [7 - (parseInt(selectedPeice.split('')[1]) -1), ['a','b','c','d','e','f','g','h'].indexOf(selectedPeice.split('')[0])]
             const piece = chess.board()[toCoor[0]][toCoor[1]];
             const selected = chess.board()[fromCoor[0]][fromCoor[1]];
-
-            if (piece) {
-                const img = document.createElement('img')
-                img.src = pieces[piece.type][piece.color]
-                img.classList.add('w-[18.75px]', 'md:w-[25px]')
-
-                if (piece.color === 'w') document.getElementById('taken-pieces-black').append(img);
-                if (piece.color === 'b') document.getElementById('taken-pieces-white').append(img);
-            }
 
             if ([1,8].includes(parseInt(move.split('')[1])) && selected.type === 'p') {
 
