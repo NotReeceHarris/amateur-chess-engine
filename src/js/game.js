@@ -23,7 +23,9 @@ const pieces = {
 ], taken = [], simplifiedNotation = [];
 
 let selectedPeice,
-whosMove = 'white';
+whosMove = 'white',
+whitePlayer = 'human',
+blackPlayer = 'human';
 
 function getPiece(notation) {
     const x = ['a','b','c','d','e','f','g','h'].indexOf(notation.split('')[0]);
@@ -351,6 +353,8 @@ function movePeice(from, to) {
 
                 console.log(formatPgn(groupNotation(simplifiedNotation)))
                 document.getElementById('notation').innerText = formatPgn(groupNotation(simplifiedNotation))
+                document.getElementById('fen-output').innerText = pgn2fen().join('\n')
+                document.getElementById('fen-output').parentElement.classList.remove('hidden')
 
                 if (fromBoard.includes('white')) whosMove = 'black';
                 if (fromBoard.includes('black')) whosMove = 'white';
@@ -381,9 +385,13 @@ function movePeice(from, to) {
     
         console.log(formatPgn(groupNotation(simplifiedNotation)))
         document.getElementById('notation').innerText = formatPgn(groupNotation(simplifiedNotation))
+        document.getElementById('fen-output').innerText = pgn2fen().join('\n')
+        document.getElementById('fen-output').parentElement.classList.remove('hidden')
 
         if (fromBoard.includes('white')) whosMove = 'black';
         if (fromBoard.includes('black')) whosMove = 'white';
+
+        displayBoard()
     }
 
 }
@@ -391,6 +399,7 @@ function movePeice(from, to) {
 function displayLegalMoves (legalMoves) {
     displayBoard()
     const markers = document.querySelectorAll(".marker");
+
     markers.forEach(marker => {
         marker.parentNode.classList.remove("cursor-pointer");
         if (marker) {
@@ -417,7 +426,7 @@ function displayLegalMoves (legalMoves) {
     });
 }
 
-function displayBoard () {
+function displayBoard() {
 
     for (let y = 0; y < 8; y++) {
         const yy = (7 - y) + 1;
@@ -425,8 +434,6 @@ function displayBoard () {
             const xx = ['a','b','c','d','e','f','g','h'][x]
 
             const square = document.getElementById(`${xx}${yy}`);
-            square.classList.remove("square");
-            square.classList.remove("cursor-pointer");
             square.innerHTML = "";
 
             const clone = square.cloneNode(true);
@@ -440,28 +447,27 @@ function displayBoard () {
             const xx = ['a','b','c','d','e','f','g','h'][x]
     
             const square = document.getElementById(`${xx}${yy}`);
-            square.classList.add("square");
             square.classList.add(`${xx}${yy}`);
+            square.classList.remove('cursor-pointer')
     
             if (board[y][x]) {
 
-                square.addEventListener("click", (e) => {
-                    selectedPeice = `${xx}${yy}`
-                    const legalMoves = getLegalMoves(selectedPeice);
-                    displayLegalMoves(legalMoves);
-                });
-
                 square.innerHTML = `<img src="${pieces[board[y][x]]}"  alt="${board[y][x]}">`;
-                square.classList.add("cursor-pointer");
-            }
-            
-            if (board[y][x] != "") {
-                square.classList.add("cursor-pointer");
+
+                if (board[y][x].includes('white') && whitePlayer === 'human' || board[y][x].includes('black') && blackPlayer === 'human') {
+                    square.addEventListener("click", (e) => {
+                        selectedPeice = `${xx}${yy}`
+                        const legalMoves = getLegalMoves(selectedPeice);
+                        displayLegalMoves(legalMoves);
+                    });
+
+                    if (board[y][x].includes('white') && whosMove === 'white' || board[y][x].includes('black') && whosMove === 'black') {
+                        square.classList.add('cursor-pointer')
+                    }
+                }
             }
     
         }
         
     }
 }
-
-displayBoard();

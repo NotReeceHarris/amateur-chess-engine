@@ -19,49 +19,71 @@
         <svg id="close-settings" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
     </div>
 
-    <div id="settings-screen" class="hidden bg-[#222222]fixed w-screen h-screen z-[100] top-0 left-0">
+    <div id="settings-screen" class="hidden overflow-y-auto bg-[#222222] absolute w-screen min-h-screen z-[100] top-0 left-0 flex flex-col gap-12 py-12 px-6">
 
-        <div class="max-w-3xl mx-auto px-6 flex flex-col justify-center gap-6">
-            <span class="text-white text-3xl font-bold text-center mt-12">Settings</span>
+        <div class="max-w-3xl mx-auto flex flex-col justify-center gap-6 min-w-full grow">
 
-            <div class="w-full max-w-[400px] mx-auto flex-col flex gap-3 mt-[25px]">
-                <div class="w-full">
-                    <label for="HeadlineAct" class="block text-sm font-medium text-white">
-                      White
-                    </label>
-                  
-                    <select
-                      class="mt-1.5 px-3 py-2 bg-[#222222] border border-white text-white sm:text-sm w-full"
-                    >
-                      <option selected value="human">Human</option>
-                      <option value="random">Random</option>
-                    </select>
-                  </div>
+            <div class="flex flex-col gap-6 grow ">
+                <div class="w-full max-w-[400px] mx-auto flex-col flex gap-3 mt-[25px]">
+                    <div class="w-full">
+                        <label for="HeadlineAct" class="block text-sm font-medium text-white">
+                          White
+                        </label>
+                      
+                        <select
+                            id="white-player"
+                          class="mt-1.5 px-3 py-2 bg-[#222222] border border-white text-white sm:text-sm w-full"
+                        >
+                          <option selected value="human">Human</option>
+                          <option value="random">Random move</option>
+                          <option value="stockfish">Stockfish</option>
+                        </select>
+                      </div>
+        
+                      <div class="w-full">
+                        <label for="HeadlineAct" class="block text-sm font-medium text-white">
+                          Black
+                        </label>
+                      
+                        <select
+                            id="black-player"
+                          class="mt-1.5 px-3 py-2 bg-[#222222] border border-white text-white sm:text-sm w-full"
+                        >
+                            <option selected value="human">Human</option>
+                            <option value="random">Random move</option>
+                            <option value="stockfish">Stockfish</option>
+                        </select>
+                      </div>
+                </div>
     
-                  <div class="w-full">
-                    <label for="HeadlineAct" class="block text-sm font-medium text-white">
-                      Black
-                    </label>
-                  
-                    <select
-                      class="mt-1.5 px-3 py-2 bg-[#222222] border border-white text-white sm:text-sm w-full"
-                    >
-                        <option selected value="human">Human</option>
-                        <option value="random">Random</option>
-                    </select>
-                  </div>
+                <div class="flex items-center w-full max-w-[400px] mx-auto ">
+                    <input id="show-pgn" type="checkbox" value="pgn" checked class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
+                    <label for="show-pgn" class="ml-2 text-sm font-medium text-white">Show PGN</label>
+                </div>
+    
+                <div class="flex items-center w-full max-w-[400px] mx-auto ">
+                    <input id="show-taken" type="checkbox" value="taken" checked class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
+                    <label for="show-taken" class="ml-2 text-sm font-medium text-white">Show taken pieces</label>
+                </div>
+    
+                <div class="flex items-center w-full max-w-[400px] mx-auto ">
+                    <input id="show-evaluations" type="checkbox" value="taken" checked class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
+                    <label for="show-evaluations" class="ml-2 text-sm font-medium text-white">Show evaluations</label>
+                </div>
+
             </div>
 
-            <div class="flex items-center w-full max-w-[400px] mx-auto ">
-                <input id="show-pgn" type="checkbox" value="pgn" checked class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
-                <label for="show-pgn" class="ml-2 text-sm font-medium text-white">Show PGN</label>
-            </div>
+        </div>
 
-            <div class="flex items-center w-full max-w-[400px] mx-auto ">
-                <input id="show-taken" type="checkbox" value="taken" checked class="w-4 h-4 bg-gray-100 border-gray-300 rounded">
-                <label for="show-taken" class="ml-2 text-sm font-medium text-white">Show Taken pieces</label>
+        <div class="flex flex-col gap-3">
+            <div class="max-w-[400px] mx-auto w-full flex flex-col gap-3">
+                <span class="text-white text-xs">Evaluation API: <span id="evaluation-api" class="text-gray-400">Requesting</span></span>
+                <span class="text-white text-xs">Stockfish API: <span id="stockfish-api" class="text-gray-400">Requesting</span></span>
             </div>
-
+    
+            <div class="hidden overflow-x-auto overflow-y-hidden max-w-[400px] min-h-max h-max mx-auto p-3 bg-[#2e2d2d] rounded-sm w-full text-white text-xs">
+                <p class="whitespace-pre" id="fen-output"></p>
+            </div>
         </div>
 
     </div>
@@ -173,54 +195,128 @@
     </div>
 </body>
 
+<script src="/src/js/fen.js"></script>
+
+<script>
+    function pgn2fen()
+{ Init('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+  SetPgnMoveText(formatPgn(groupNotation(simplifiedNotation)));  
+  var ff="", ff_new="", ff_old;  
+  do
+  { ff_old=ff_new;
+    MoveForward(1);
+    ff_new=GetFEN();
+    if (ff_old!=ff_new) ff+=ff_new+"\n";
+  }
+  while (ff_old!=ff_new);
+  return ff.split('\n')
+}
+
+</script>
+
 <script src="/src/js/game.js"></script>
 
 <script>
-    document.getElementById('settings').addEventListener('click', function() {
-        var element = document.getElementById('settings-screen');
-        if (element.classList.contains('hidden')) {
-            element.classList.remove('hidden');
-            document.getElementById('open-settings').classList.add('hidden')
-            document.getElementById('close-settings').classList.remove('hidden')
+(() => {
+    const statusElement = document.getElementById('evaluation-api');
+    const stockfishStatusElement = document.getElementById('stockfish-api');
+    const evaluationAPI = "https://stockfish.online/api/stockfish.php";
+    const settingsButton = document.getElementById('settings');
+    const settingsScreen = document.getElementById('settings-screen');
+    const openSettings = document.getElementById('open-settings');
+    const closeSettings = document.getElementById('close-settings');
+    const whitePlayerSelect = document.getElementById('white-player');
+    const blackPlayerSelect = document.getElementById('black-player');
+    const showPGNCheckbox = document.getElementById('show-pgn');
+    const showEvaulationCheckbox = document.getElementById('show-evaluations');
+    const evaluation = document.getElementById('notation');
+    const notation = document.getElementById('notation');
+    const showTakenCheckbox = document.getElementById('show-taken');
+    const takenPiecesWhite = document.getElementById('taken-pieces-white');
+    const takenPiecesBlack = document.getElementById('taken-pieces-black');
+
+    const toggleSettings = () => {
+        settingsScreen.classList.toggle('hidden');
+        openSettings.classList.toggle('hidden');
+        closeSettings.classList.toggle('hidden');
+    };
+
+    const handleWhitePlayerChange = () => {
+        whitePlayer = whitePlayerSelect.value;
+        displayBoard();
+    };
+
+    const handleBlackPlayerChange = () => {
+        blackPlayer = blackPlayerSelect.value;
+        displayBoard();
+    };
+
+    const togglePGN = () => {
+        notation.classList.toggle('hidden', !showPGNCheckbox.checked);
+    };
+
+    const toggleEvaluation = () => {
+        evaluation.classList.toggle('hidden', !showEvaulationCheckbox.checked);
+    };
+
+    const toggleTakenPieces = () => {
+        if (showTakenCheckbox.checked) {
+            takenPiecesWhite.classList.remove('hidden');
+            takenPiecesBlack.classList.remove('hidden');
         } else {
-            element.classList.add('hidden');
-            document.getElementById('open-settings').classList.remove('hidden')
-            document.getElementById('close-settings').classList.add('hidden')
+            takenPiecesWhite.classList.add('hidden');
+            takenPiecesBlack.classList.add('hidden');
         }
-    })
+    };
 
-    document.getElementById('show-pgn').addEventListener('change', function() {
-        if (this.checked) {
-            document.getElementById('notation').classList.remove('hidden')
-        } else {
-            document.getElementById('notation').classList.add('hidden')
-        }
-    })
+    settingsButton.addEventListener('click', toggleSettings);
+    whitePlayerSelect.addEventListener('change', handleWhitePlayerChange);
+    blackPlayerSelect.addEventListener('change', handleBlackPlayerChange);
+    showPGNCheckbox.addEventListener('change', togglePGN);
+    showTakenCheckbox.addEventListener('change', toggleTakenPieces);
+    showEvaulationCheckbox.addEventListener('change', toggleEvaluation);
 
-    document.getElementById('show-taken').addEventListener('change', function() {
-        if (this.checked) {
-            document.getElementById('taken-pieces-white').classList.remove('hidden')
-            document.getElementById('taken-pieces-black').classList.remove('hidden')
-        } else {
-            document.getElementById('taken-pieces-white').classList.add('hidden')
-            document.getElementById('taken-pieces-black').classList.add('hidden')
-        }
-    })
+    toggleEvaluation();
+    togglePGN();
+    toggleTakenPieces();
+    displayBoard();
 
+    fetch(evaluationAPI + '?fen=rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1&depth=1&mode=bestmove')
+        .then(response => {
+            if (!response.ok) {
+            throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success === true) {
+                statusElement.innerText = 'Online'
+                statusElement.classList.remove('text-gray-400')
+                statusElement.classList.add('text-green-400')
+                stockfishStatusElement.innerText = 'Online'
+                stockfishStatusElement.classList.remove('text-gray-400')
+                stockfishStatusElement.classList.add('text-green-400')
+            } else {
+                statusElement.innerText = 'Offline'
+                statusElement.classList.remove('text-gray-400')
+                statusElement.classList.add('text-red-400')
+                stockfishStatusElement.innerText = 'Offline'
+                stockfishStatusElement.classList.remove('text-gray-400')
+                stockfishStatusElement.classList.add('text-red-400')
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            statusElement.innerText = 'Offline'
+            statusElement.classList.remove('text-gray-400')
+            statusElement.classList.add('text-red-400')
+            stockfishStatusElement.innerText = 'Offline'
+            stockfishStatusElement.classList.remove('text-gray-400')
+            stockfishStatusElement.classList.add('text-red-400')
+        });
 
-    if (document.getElementById('show-pgn').checked) {
-        document.getElementById('notation').classList.remove('hidden')
-    } else {
-        document.getElementById('notation').classList.add('hidden')
-    }
+})();
 
-    if (document.getElementById('show-taken').checked) {
-        document.getElementById('taken-pieces-white').classList.remove('hidden')
-        document.getElementById('taken-pieces-black').classList.remove('hidden')
-    } else {
-        document.getElementById('taken-pieces-white').classList.add('hidden')
-        document.getElementById('taken-pieces-black').classList.add('hidden')
-    }
 </script>
 
 </html>
